@@ -7,12 +7,15 @@ import React from 'react'
 
 interface ReturnButtonProps {
     color?: string
+    onPress?: () => void
 }
 
-const ReturnButton = ({color = 'white'}: ReturnButtonProps) => {
+const ReturnButton = ({color = 'white', onPress}: ReturnButtonProps) => {
+
+    const p = onPress ? onPress : () => router.back()
   
     return (
-        <Pressable onPress={() => router.back()} hitSlop={AppConstants.hitSlopLarge} >
+        <Pressable onPress={p} hitSlop={AppConstants.hitSlopLarge} >
             <Ionicons name='return-down-back-outline' size={40} color={color} />
         </Pressable>
     )

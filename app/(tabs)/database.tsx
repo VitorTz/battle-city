@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import TabPage from '@/components/TabPage'
 
-const database = () => {
+const Database = () => {
   return (
     <TabPage title='Database'>
         
@@ -10,6 +10,6 @@ const database = () => {
   )
 }
 
-export default database
+export default Database
 
 const styles = StyleSheet.create({})

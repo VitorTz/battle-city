@@ -4,13 +4,14 @@ import {
     StyleSheet 
 } from 'react-native'
 import React, { useEffect } from 'react'
-import { Colors } from '../constants/Colors'
+import { router } from 'expo-router'
+import { AppStyle } from '@/style/AppStyle'
 import { 
-    fetchUserCards,
-    supabaseGetProfileIcons, 
-    supabaseGetSession, 
-    supabaseGetUser 
-} from "../lib/supabase";
+  fetchUserCards,
+  supabaseGetProfileIcons, 
+  supabaseGetSession, 
+  supabaseGetUser 
+} from '../lib/supabase'
 import {
   useFonts,
   LeagueSpartan_100Thin,
@@ -22,70 +23,68 @@ import {
   LeagueSpartan_700Bold,
   LeagueSpartan_800ExtraBold,
   LeagueSpartan_900Black,
-} from '@expo-google-fonts/league-spartan';
-import { router } from 'expo-router';
-import { AppStyle } from '@/style/AppStyle';
-import { useAuthStore } from '@/store/AuthStore';
-import { useUserCardStore } from '@/store/UserCardsStore';
-import { useProfileIconsStore } from '@/store/ProfileIconsStore';
+} from '@expo-google-fonts/league-spartan'
+import { useAuthStore } from '@/store/AuthStore'
+import { useUserCardStore } from '@/store/UserCardsStore'
+import { useProfileIconsStore } from '@/store/ProfileIconsStore'
 
 
-const index = () => {
-  
-  let [fontsLoaded] = useFonts({
-    LeagueSpartan_100Thin,
-    LeagueSpartan_200ExtraLight,
-    LeagueSpartan_300Light,
-    LeagueSpartan_400Regular,
-    LeagueSpartan_500Medium,
-    LeagueSpartan_600SemiBold,
-    LeagueSpartan_700Bold,  
-    LeagueSpartan_800ExtraBold,
-    LeagueSpartan_900Black,
-  });
+const App = () => {
 
-  const { login, logout } = useAuthStore()
-  const { setCards } = useUserCardStore()
-  const { icons, setIcons } = useProfileIconsStore()
+    const { login, logout } = useAuthStore()
+    const { setCards } = useUserCardStore()
+    const { icons, setIcons } = useProfileIconsStore()
 
-  const initPage = async () => {
-    
-    const session = await supabaseGetSession()
+    let [fontsLoaded] = useFonts({
+        LeagueSpartan_100Thin,
+        LeagueSpartan_200ExtraLight,
+        LeagueSpartan_300Light,
+        LeagueSpartan_400Regular,
+        LeagueSpartan_500Medium,
+        LeagueSpartan_600SemiBold,
+        LeagueSpartan_700Bold,  
+        LeagueSpartan_800ExtraBold,
+        LeagueSpartan_900Black,
+    })
 
-    if (icons.length == 0) {
-        await supabaseGetProfileIcons()
-            .then(icons => setIcons(icons))
-    }
+    const initApp = async () => {
+        const session = await supabaseGetSession()
 
+        if (icons.length === 0) {
+            const iconsData = await supabaseGetProfileIcons()
+            setIcons(iconsData)
+        }
 
-    if (session) {
-        await supabaseGetUser(session.user.id)
-            .then(user => { if (user) { login(session, user) } })
-        await fetchUserCards(session.user.id)
-            .then(cards => setCards(cards))
-        router.replace("/(tabs)/database")
-    } else {
+        if (session) {
+            const user = await supabaseGetUser(session.user.id)
+            if (user) {
+                login(session, user)
+                await fetchUserCards(session.user.id)
+                    .then(cards => setCards(cards))
+                router.replace("/database")
+                return
+            }
+        } 
         logout()
         setCards([])
-        router.replace("/(auth)/login")
-    }    
+        router.replace("/login")
+    }
 
-  }
+    useEffect(() => {
+        if (fontsLoaded) {
+            initApp()
+        }
+    }, [fontsLoaded])
 
-  useEffect(
-    () => {
-      if (fontsLoaded) { initPage() }
-    },
-    [fontsLoaded]
-  )
+    return (
+        <SafeAreaView  style={[AppStyle.safeArea, {alignItems: "center", justifyContent: "center"}]} >
+            <ActivityIndicator size={64} color={'white'}/>
+        </SafeAreaView>
+    )
 
-  return (
-    <SafeAreaView style={[AppStyle.safeArea, {alignItems: "center", justifyContent: "center"}]}>
-      <ActivityIndicator size={64} color={Colors.orange}/>
-    </SafeAreaView>    
-  )
+
 }
 
-export default index;
+export default App
 
 const styles = StyleSheet.create({})

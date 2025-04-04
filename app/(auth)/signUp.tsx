@@ -4,7 +4,7 @@ import Page from '@/components/Page'
 import { router } from 'expo-router'
 import { AppStyle } from '@/style/AppStyle'
 
-const Login = () => {
+const SignUp = () => {
   return (
     <Page title='Login' showReturnButton={true} returnButtonOnPress={() => router.replace("/database")} >
       <View>
@@ -14,6 +14,6 @@ const Login = () => {
   )
 }
 
-export default Login
+export default SignUp
 
 const styles = StyleSheet.create({})

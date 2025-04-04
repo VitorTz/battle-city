@@ -9,20 +9,22 @@ interface PageProps {
     children?: React.JSX.Element
     showReturnButton?: boolean
     returnButtonColor?: string
+    returnButtonOnPress?: () => void
 }
 
 const Page = ({
     title,
     children,
     showReturnButton,
-    returnButtonColor
+    returnButtonColor,
+    returnButtonOnPress
 }: PageProps) => {
 
   return (
     <SafeAreaView style={AppStyle.safeArea} >
         <TopBar title={title}>
             <>
-            {showReturnButton && <ReturnButton color={returnButtonColor} />}
+            {showReturnButton && <ReturnButton color={returnButtonColor} onPress={returnButtonOnPress} />}
             </>
         </TopBar>
         {children}

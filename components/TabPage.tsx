@@ -10,12 +10,14 @@ interface TabPageProps {
     children?: React.JSX.Element
     showReturnButton?: boolean
     returnButtonColor?: string
+    returnButtonOnPress?: () => void
 }
 
 
 const TabPage = ({
     title,
     children,
+    returnButtonOnPress,
     showReturnButton = false,
     returnButtonColor = 'white'
 }: TabPageProps) => {
@@ -23,7 +25,7 @@ const TabPage = ({
   return (
     <SafeAreaView style={[AppStyle.safeArea, {paddingBottom: 80}]} >
         <TopBar title={title}>
-            <>{showReturnButton && <ReturnButton color={returnButtonColor} />}</>
+            <>{showReturnButton && <ReturnButton color={returnButtonColor} onPress={returnButtonOnPress} />}</>
         </TopBar>
         {children}
     </SafeAreaView>

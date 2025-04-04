@@ -2,14 +2,14 @@ import { StyleSheet, Text, View } from 'react-native'
 import TabPage from '@/components/TabPage'
 import React from 'react'
 
-const stats = () => {
+const Stats = () => {
     return (
-        <TabPage title='News'>
+        <TabPage title='Stats'>
             
         </TabPage>
     )
 }
 
-export default stats
+export default Stats
 
 const styles = StyleSheet.create({})

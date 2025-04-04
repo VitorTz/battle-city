@@ -1,10 +1,10 @@
 
 
 export const Colors = {
+  black: "#000000",
+  almostBlack: "#191A1C",
+  white: "#fff",
   background: "#191A1C",
-  text: "white",
-  white: "white",
-  black: "#1e1e1e",
   gray: "#2C2C2C",
   gray1: "#3D414A",
   orange: "#FF6740",
@@ -14,13 +14,15 @@ export const Colors = {
   silver: "#C3C3C3",
   paleGrey: "#E5E5E5",
   mediumGray: "#696969",
-  deckColor: "#4984A2",
-  cardColor: "#ef4069",
+  deckColor: "#8746A7",
+  cardColor: "#F24E4E",
   packColor: "#FF6740",
-  accentColor: "#FF6740",
-  limitedColor: "#C14853",
-  uglyBlue: "#4984A2",
-  matchHistoryColors: "#4984A2",
-  green: "#98C379",
-  neonRed: "#ef4069"
+  accentColor: "#2C2C2C",
+  manhwaStatusColor: "#FFFDEC",
+  uglyBlue: "#4984A2",  
+  green: "#86A788",
+  neonRed: "#ef4069",
+  paleYellow: "#FFFDEC",
+  clayDust: "#C4A79D",
+  frostedBlue: "#D3E0F7"
 };

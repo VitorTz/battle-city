@@ -2,14 +2,14 @@ import { StyleSheet, Text, View } from 'react-native'
 import TabPage from '@/components/TabPage'
 import React from 'react'
 
-const collection = () => {
+const Collection = () => {
     return (
-        <TabPage title='News'>
+        <TabPage title='Collection'>
             
         </TabPage>
     )
 }
 
-export default collection
+export default Collection
 
 const styles = StyleSheet.create({})

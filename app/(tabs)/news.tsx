@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import TabPage from '@/components/TabPage'
 import React from 'react'
 
-const news = () => {
+const News = () => {
     return (
         <TabPage title='News'>
             
@@ -10,6 +10,6 @@ const news = () => {
     )
 }
 
-export default news
+export default News
 
 const styles = StyleSheet.create({})
