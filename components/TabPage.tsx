@@ -8,6 +8,7 @@ import ReturnButton from './ReturnButton'
 interface TabPageProps {
     title: string
     children?: React.JSX.Element
+    buttonIconName?: string
     showReturnButton?: boolean
     returnButtonColor?: string
     returnButtonOnPress?: () => void
@@ -18,6 +19,7 @@ const TabPage = ({
     title,
     children,
     returnButtonOnPress,
+    buttonIconName,
     showReturnButton = false,
     returnButtonColor = 'white'
 }: TabPageProps) => {
@@ -25,7 +27,7 @@ const TabPage = ({
   return (
     <SafeAreaView style={[AppStyle.safeArea, {paddingBottom: 80}]} >
         <TopBar title={title}>
-            <>{showReturnButton && <ReturnButton color={returnButtonColor} onPress={returnButtonOnPress} />}</>
+            <>{showReturnButton && <ReturnButton iconName={buttonIconName} color={returnButtonColor} onPress={returnButtonOnPress} />}</>
         </TopBar>
         {children}
     </SafeAreaView>

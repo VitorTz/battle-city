@@ -24,5 +24,6 @@ export const Colors = {
   neonRed: "#ef4069",
   paleYellow: "#FFFDEC",
   clayDust: "#C4A79D",
+  limitedColor: "#C14853",
   frostedBlue: "#D3E0F7"
 };

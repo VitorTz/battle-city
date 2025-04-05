@@ -12,8 +12,12 @@ const _layout = () => {
         <StatusBar barStyle={'light-content'} backgroundColor={Colors.background} />
         <Stack>
             <Stack.Screen name='index' options={{headerShown: false}} />
-            <Stack.Screen name='(auth)/login' options={{headerShown: false}} />
             <Stack.Screen name='(auth)/signUp' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/changeProfileIconPage' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/CardCollection' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/CardPage' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/CardDatabase' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/DeckDatabase' options={{headerShown: false}} />
             <Stack.Screen name='(tabs)' options={{headerShown: false}} />
         </Stack>
         <Toast.Component/>

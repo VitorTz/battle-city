@@ -3,13 +3,16 @@ import React from 'react'
 import Page from '@/components/Page'
 import { router } from 'expo-router'
 import { AppStyle } from '@/style/AppStyle'
+import SignUpForm from '@/components/forms/SignUpForm'
+
 
 const SignUp = () => {
   return (
-    <Page title='Login' showReturnButton={true} returnButtonOnPress={() => router.replace("/database")} >
-      <View>
-        <Text style={AppStyle.textRegularLarge}>131s2</Text>
-      </View>
+    <Page 
+      title='SignUp' 
+      showReturnButton={true} 
+      returnButtonOnPress={() => router.replace("/database")}>
+      <SignUpForm/>
     </Page>
   )
 }

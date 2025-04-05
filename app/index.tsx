@@ -59,15 +59,14 @@ const App = () => {
             const user = await supabaseGetUser(session.user.id)
             if (user) {
                 login(session, user)
-                await fetchUserCards(session.user.id)
-                    .then(cards => setCards(cards))
+                await fetchUserCards(session.user.id).then(cards => setCards(cards))
                 router.replace("/database")
                 return
             }
         } 
         logout()
         setCards([])
-        router.replace("/login")
+        router.replace("/(tabs)/database")
     }
 
     useEffect(() => {
