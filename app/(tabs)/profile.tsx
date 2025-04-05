@@ -7,7 +7,7 @@ import { Image } from 'expo-image'
 import SignInForm from '@/components/forms/LoginForm'
 import { Colors } from '@/constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
-import { hp, wp } from '@/helpers/util'
+import RandomTrivia from '@/components/RandomTrivia'
 import { useUserCardStore } from '@/store/UserCardsStore'
 import { supabase } from '@/lib/supabase'
 import { AppConstants } from '@/constants/AppConstants'
@@ -77,7 +77,7 @@ const ProfileIcon = () => {
 
 const LoggedComponent = () => {
 
-    const { user, logout } = useAuthStore()
+    const { logout } = useAuthStore()
 
     const { setCards } = useUserCardStore()
 
@@ -103,6 +103,7 @@ const LoggedComponent = () => {
                 <Option title='Settings' subTitle='color theme' iconName='settings-outline' onPress={() => console.log("settings")} />
                 <Option title='Github' subTitle='source code' iconName='logo-github' onPress={openGithubPage} />
                 <Option title='Logout' subTitle='' iconName='log-out-outline' onPress={handleLogout} />
+                <RandomTrivia/>
             </View>
         </View>
     )
@@ -113,7 +114,7 @@ const Profile = () => {
     
     const { session } = useAuthStore()
 
-    const pageName = session ? 'Profile' : 'Login'
+    const pageName = session ? '' : 'Login'
 
     return (
         <TabPage title={pageName}>

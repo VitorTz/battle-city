@@ -43,7 +43,7 @@ const CustomDropDownPicker = ({
         <DropDownPicker
             zIndex={zindex}                
             open={open}
-            style={{backgroundColor: Colors.gray, borderWidth: 0}}
+            style={{backgroundColor: Colors.gray, borderWidth: 0, borderRadius: 4}}
             disabledStyle={{opacity: 0.5}}                             
             items={items}
             setOpen={setOpen}

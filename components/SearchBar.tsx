@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Animated, Pressable, StyleSheet, TextInput, View } from 'react-native'
 import { Colors } from '@/constants/Colors'
-import React, { useState, useCallback } from 'react'
+import React, { useState, useRef, useCallback } from 'react'
 import { debounce } from 'lodash'
 import { Ionicons } from '@expo/vector-icons'
 import { AppConstants } from '@/constants/AppConstants'
@@ -19,14 +19,32 @@ const SearchBar = ({
 }: SearchBarProps) => {
 
     const [menuOpen, setMenuOpen] = useState(false)
+    
+    const rotationAnim = useRef(new Animated.Value(0)).current
 
     const debounceSearch = useCallback(
         debounce(onChangeValue, 400),
         []
     )
+    
+    const rotateIcon = () => {
+        Animated.timing(rotationAnim, {
+          toValue: menuOpen ? 0 : 1,  // Alterna entre 0 e 1
+          duration: 600,           // Duração da animação em milissegundos
+          useNativeDriver: true    // Utiliza o driver nativo para melhor performance
+        }).start(() => {
+            setMenuOpen(!menuOpen)
+        })
+      }
+
+    const rotation = rotationAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '180deg']
+    })
+    
 
     const toggle = () => {
-        setMenuOpen(prev => !prev)
+        rotateIcon()
         toggleMenu ? toggleMenu() : null
     }
 
@@ -44,7 +62,9 @@ const SearchBar = ({
                 onPress={toggle}
                 style={{position: 'absolute', right: 10, top: 0, bottom: 0, justifyContent: "center"}}
                 hitSlop={AppConstants.hitSlopLarge}>
-                <Ionicons name={iconName} size={28} color={'white'} />
+                <Animated.View style={{transform: [{rotate: rotation}]}}>
+                    <Ionicons name={'arrow-up-circle'} size={24} color={Colors.white} />
+                </Animated.View>
             </Pressable>
         </View>
     )
@@ -57,11 +77,9 @@ const styles = StyleSheet.create({
         width: '100%', 
         height: 50, 
         paddingHorizontal: 10,
-        borderWidth: 1,
-        borderColor: 'white',
         borderRadius: 4, 
         color: 'white',
         fontFamily: "LeagueSpartan_400Regular",
-        backgroundColor: Colors.background
+        backgroundColor: Colors.gray
     }
 })

@@ -14,6 +14,7 @@ import { Deck } from '@/types/Deck';
 import { User } from '@/types/User';
 import Toast from '@/helpers/Toast';
 import { CardSearchOptions } from "@/types/CardSearchOptions";
+import { DeckSearchOptions } from "@/types/DeckSearchOptions";
   
   
   
@@ -102,13 +103,15 @@ export async function checkIfUsernameExists(username: string): Promise<boolean> 
 }
 
 
-export async function supabaseAddCardToUserCollection(card_id: number, total: number): Promise<boolean> {
-    const session = await supabaseGetSession()
-    if (!session) { return false }
+export async function supabaseAddCardToUserCollection(
+    user_id: string,
+    card_id: number, 
+    total: number = 1
+): Promise<boolean> {
 
     const { error } = await supabase.rpc('insert_user_card', {
         p_card_id: card_id,
-        p_user_id: session!.user.id,
+        p_user_id: user_id,
         p_quantity: total
     })
 
@@ -116,17 +119,20 @@ export async function supabaseAddCardToUserCollection(card_id: number, total: nu
         console.log(error)
         return false
     }
+
     return true
 }
 
 
-export async function supabaseRmvCardFromUserCollection(card_id: number, total: number): Promise<boolean> {
-    const session = await supabaseGetSession()
-    if (!session) { return false }
+export async function supabaseRmvCardFromUserCollection(
+    user_id: string,
+    card_id: number, 
+    total: number = 1
+): Promise<boolean> {
 
     const { error } = await supabase.rpc('remove_user_card', {
         p_card_id: card_id,
-        p_user_id: session!.user.id,
+        p_user_id: user_id,
         p_quantity: total
     })
 
@@ -134,6 +140,7 @@ export async function supabaseRmvCardFromUserCollection(card_id: number, total: 
         console.log(error)
         return false
     }
+
     return true
 }
 
@@ -541,17 +548,13 @@ export async function fetchCards(options: CardSearchOptions): Promise<Card[]> {
 }
 
 
-export const fetchDecks = async (
-    searchTxt: string | null,
-    options: Map<any, any>, 
-    page: number
-): Promise<Deck[]> => {
+export const fetchDecks = async (options: DeckSearchOptions): Promise<Deck[]> => {
     let query = supabase.from("decks").select(`
         users (
-        name,
-        images (
-            image_url
-        )
+            name,
+            images (
+                image_url
+            )
         ),
         deck_id,
         name,
@@ -565,74 +568,50 @@ export const fetchDecks = async (
         races,
         types,
         is_public,
-        created_by    
-    `)
+        created_by`)
 
     query = query.eq("is_public", true)  
 
-    if (searchTxt) {
-        query = query.ilike("name", `%${searchTxt}%`)
+    if (options.name && options.name != '') {
+        query = query.ilike("name", `%${options.name}%`)
     }
 
-    if (options.has('archetypes')) {
-        options.get('archetypes').forEach(
-        (value: string) => {
-            query = query.contains('archetypes', [value])
-        }
-        )
+    if (options.archetypes.length > 0) {
+        options.archetypes.forEach(archetype => query = query.contains('archetypes', [archetype]))
+    }
+    
+    if (options.attributes.length > 0) {
+        options.attributes.forEach(archetype => query = query.contains('attributes', [archetype]))
     }
 
-    if (options.has('attributes')) {
-        options.get('attributes').forEach(
-        (value: string) => {
-            query = query.contains('attributes', [value])
-        }
-        )
+    if (options.frametypes.length > 0) {
+        options.frametypes.forEach(archetype => query = query.contains('frametypes', [archetype]))
     }
 
-    if (options.has('frametypes')) {
-        options.get('frametypes').forEach(
-        (value: string) => {
-            query = query.contains('frametypes', [value])
-        }
-        )
+    if (options.races.length > 0) {
+        options.races.forEach(archetype => query = query.contains('races', [archetype]))
     }
 
-    if (options.has('races')) {
-        options.get('races').forEach(
-        (value: string) => {        
-            query = query.contains('races', [value])
-        }
-        )
+    if (options.types.length > 0) {
+        options.types.forEach(archetype => query = query.contains('types', [archetype]))
     }
 
-    if (options.has('types')) {
-        options.get('types').forEach(
-        (value: string) => {
-            query = query.contains('types', [value])
-        }
-        )
-    }
-
-    if (options.has('deckType') && !options.get('deckType').includes("Any")) {    
-        const s = options.get('deckType').map((item: string) => `type.eq.${item}`).join(',')
-        if (s) {      
+    if (options.deckType.length > 0 && !options.deckType.includes('Any')) {
+        const s = options.deckType.map((item: string) => `type.eq.${item}`).join(',')
         query = query.or(s)
-        }    
     }
-
 
     const {data, error} = await query
         .order('name', {ascending: true})
-        .range(page * DECK_FETCH_LIMIT, (page * DECK_FETCH_LIMIT) + DECK_FETCH_LIMIT - 1)
+        .range(options.page * DECK_FETCH_LIMIT, (options.page * DECK_FETCH_LIMIT) + DECK_FETCH_LIMIT - 1)
         .overrideTypes<Deck[]>()
 
     if (error) { console.log(error) }
 
     data?.forEach(
-        item => {      
-        item.owner_name = item.users ? (item.users as any).name : null
-        item.owner_image_url = item.users ? (item.users as any).images.image_url : null
+        item => {
+            item.owner_name = item.users ? (item.users as any).name : null
+            item.owner_image_url = item.users ? (item.users as any).images.image_url : null
         }
     )
     return data ? data as Deck[] : []

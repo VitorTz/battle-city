@@ -46,6 +46,7 @@ const CardGrid = ({
             </View>
             <FlashList
                 contentContainerStyle={{paddingLeft: 5}}
+                nestedScrollEnabled={true}
                 data={cards}
                 numColumns={numColumns}
                 estimatedItemSize={cardHeight * 2}

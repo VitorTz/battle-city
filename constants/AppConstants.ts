@@ -1,5 +1,5 @@
-import { Colors } from "./Colors";
 import { Platform } from "react-native";
+import { Colors } from "./Colors";
 
 
 export const API_CARD_WIDTH = 813
@@ -61,11 +61,14 @@ export const AppConstants = {
 }
 
 export const DECK_TYPES = [
+  "TCG",
   "Structure",
   "Community",
-  "TCG",
-  "Anime"
-].sort()
+  "OCG",
+  "Anime",
+  "Starter",
+  "Speed Duel"
+]
 
 
 export const ARCHETYPES = [

@@ -18,6 +18,7 @@ const _layout = () => {
             <Stack.Screen name='(pages)/CardPage' options={{headerShown: false}} />
             <Stack.Screen name='(pages)/CardDatabase' options={{headerShown: false}} />
             <Stack.Screen name='(pages)/DeckDatabase' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/DeckPage' options={{headerShown: false}} />
             <Stack.Screen name='(tabs)' options={{headerShown: false}} />
         </Stack>
         <Toast.Component/>

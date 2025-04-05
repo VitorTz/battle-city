@@ -15,9 +15,10 @@ const CardDatabase = () => {
 
   const [cards, setCards] = useState<Card[]>([])
   const [loading, setLoading] = useState(false)
-  const [hasReults, setHasReults] = useState(true)
+  const [hasResults, setHasReults] = useState(true)
   const [isInitialized, setInitialized] = useState(false)
-
+  const [menuExpanded, setMenuExpanded] = useState(false)
+  
   const searchOptions = useRef<CardSearchOptions>({
     name: null,
     attributes: [],
@@ -60,30 +61,29 @@ const CardDatabase = () => {
   }
 
   const applyFilters = async () => {
-    console.log(searchOptions.current)
     await handleSearch(searchOptions.current!.name)
   }
 
   const debounceApplyFilters = useCallback(
       debounce(applyFilters, 500),
       []
-  )
-
+  )  
+  
   const toggleMenu = () => {
-
+    setMenuExpanded(prev => !prev)
   }
   
   return (
-    <Page title='Card Database' showReturnButton={true} returnButtonColor={Colors.cardColor} >
+    <Page title='Card Database' showReturnButton={true} returnButtonColor={Colors.white} >
       <>
         <SearchBar onChangeValue={handleSearch} toggleMenu={toggleMenu} />
-        <View style={{width: '100%'}} >
-          <CardPicker applyChanges={debounceApplyFilters as any} options={searchOptions.current!} />
+        <View style={{display: menuExpanded ? 'flex' : 'none'}}>
+          <CardPicker applyChanges={debounceApplyFilters as any} options={searchOptions.current} />
         </View>
         <CardFlashList 
           cards={cards} 
           loading={loading} 
-          hasResults={hasReults}
+          hasResults={hasResults}
           gap={20}
           numColumns={4}
           onEndReached={onEndReached}/>

@@ -10,10 +10,12 @@ import { useUserCardStore } from '@/store/UserCardsStore'
 const Collection = () => {
 
     const { cards } = useUserCardStore()
+    
+    const cardList = Array.from(cards.values())
 
     return (
         <TabPage title='Collection'>
-            <CardGrid title='Cards' cards={cards} numColumns={3}>
+            <CardGrid title='Cards' cards={cardList} numColumns={4}>
                 <Pressable>
                     <Ionicons name='add' size={20} color={Colors.white} />
                 </Pressable>

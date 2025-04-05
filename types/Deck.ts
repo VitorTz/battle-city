@@ -1,6 +1,7 @@
 
 
-export type DeckType = "Structure" | "Community" | "Starter" | "Any" | "TCG"
+export type DeckType = "Structure" | "Community" | "Starter" | "Any" | "TCG" | "OCG" | "Speed Duel"
+
 
 export interface Deck {
     owner_name: string | null
