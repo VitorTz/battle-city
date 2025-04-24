@@ -1,43 +1,32 @@
-import { View, Text, StyleSheet } from "react-native"
-import { AppStyle } from "@/style/AppStyle"
-import { Colors } from "@/constants/Colors"
+import { StyleSheet, Text, View, Pressable } from 'react-native'
+import { AppStyle } from '@/style/AppStyle'
+import { AppConstants } from '@/constants/AppConstants'
+import { Ionicons } from '@expo/vector-icons'
+import { Colors } from '@/constants/Colors'
+import React from 'react'
 
 
-interface TopBarProps {
+
+interface TopBarInterface {
   title: string
-  textColor?: string
-  children?: React.JSX.Element
-  marginBottom?: number
+  onPress?: () => any
+  iconName?: string
 }
 
 
-const TopBar = ({
-    title, 
-    textColor = Colors.white, 
-    children,
-    marginBottom = 10
-  }: TopBarProps) => {    
-    return (
-      <View style={[styles.container, {marginBottom}]} >
-        <Text
-          style={[AppStyle.textRegular, {color: textColor, fontSize: 32}]}>{title}
-        </Text>
-        <View>
-          {children}
-        </View>
-      </View>
-    )
-  }
+const TopBar = ({title, onPress, iconName}: TopBarInterface) => {
+  return (
+    <View style={{width: '100%', alignItems: "center", flexDirection: 'row', justifyContent: "space-between"}} >
+        <Text style={[AppStyle.textRegularLarge, {fontSize: 28}]}>{title}</Text>
+        <Pressable onPress={onPress} hitSlop={AppConstants.hitSlopLarge} >
+            <Ionicons name={iconName as any} size={32} color={Colors.white} />
+        </Pressable>
+    </View>
+  )
+}
 
 
 export default TopBar
 
 
-const styles = StyleSheet.create({
-    container: {
-        width: '100%', 
-        flexDirection: 'row', 
-        alignItems: "center", 
-        justifyContent: "space-between"
-    }   
-})
+const styles = StyleSheet.create({})

@@ -4,7 +4,7 @@ import {
     ActivityIndicator, 
     StyleSheet 
 } from 'react-native'
-import { supabase, spGetSession } from '@/lib/supabase'
+import { supabase, spGetSession, spGetUser, spUpdateUserLastLogin } from '@/lib/supabase'
 import React, { useEffect } from 'react'
 import { AppStyle } from '@/style/AppStyle'
 import {
@@ -19,6 +19,7 @@ import {
     LeagueSpartan_800ExtraBold,
     LeagueSpartan_900Black,
 } from '@expo-google-fonts/league-spartan'
+import { router } from 'expo-router'
 
 
 AppState.addEventListener(
@@ -51,8 +52,14 @@ const App = () => {
         const session = await spGetSession()
 
         if (session) {
-
+            const user_id: string = session.user.id
+            const user = await spGetUser(user_id)
+            await spUpdateUserLastLogin(user_id)
+            router.replace("/(tabs)/database")
+            return
         }
+
+        router.replace("/(auth)/SignIn")
 
     }
 

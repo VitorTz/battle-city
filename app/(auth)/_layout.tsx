@@ -7,10 +7,11 @@ import React from 'react'
 const _layout = () => {
   return (
     <View style={{flex: 1, backgroundColor: Colors.background}} >
-        <Stack>
-            
-        </Stack>
-      </View>
+      <Stack>
+          <Stack.Screen name='SignIn' options={{headerShown: false}} />
+          <Stack.Screen name='SignUp' options={{headerShown: false}} />
+      </Stack>
+    </View>
   )
 }
 
