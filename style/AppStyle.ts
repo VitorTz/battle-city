@@ -8,7 +8,8 @@ export const AppStyle = StyleSheet.create({
         flex: 1,
         gap: 10,
         backgroundColor: Colors.background,
-        padding: wp(5)
+        padding: wp(5),
+        paddingBottom: 80
     },
     textRegular: {
         fontFamily: "LeagueSpartan_400Regular",

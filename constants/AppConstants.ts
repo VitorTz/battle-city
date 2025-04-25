@@ -30,7 +30,7 @@ export const AppConstants = {
         bottom: 10
     },
     maxDeckDescrLenght: 5000,
-    githubUrl: "https://github.com/VitorTz/ygoapp",
+    githubUrl: "https://github.com/VitorTz/battle-city",
     profileOptions: [
         {
           title: "Profile",

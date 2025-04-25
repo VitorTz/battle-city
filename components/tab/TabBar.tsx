@@ -12,7 +12,6 @@ const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps ) => {
     return (
       <View style={styles.container}>
         {state.routes.map((route, index) => {
-          
           const { options } = descriptors[route.key];
           const label =
             options.tabBarLabel !== undefined

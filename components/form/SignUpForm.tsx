@@ -9,7 +9,7 @@ import {
     Text, 
     View 
 } from 'react-native'
-import { supabase, spGetSession } from '@/lib/supabase';
+import { supabase, spGetSession, spGetUser } from '@/lib/supabase';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Colors } from '../../constants/Colors';
@@ -19,6 +19,8 @@ import { useState } from 'react'
 import * as yup from 'yup';
 import React from 'react'
 import { sleep } from '@/helpers/util';
+import { useAuthStore } from '@/store/authStore';
+import { AppUser } from '@/types/AppUser';
 
 
 const schema = yup.object().shape({  
@@ -52,7 +54,9 @@ interface FormData {
 
 const SignUpForm = () => {
 
+    const { login, logout } = useAuthStore()
     const [isLoading, setLoading] = useState(false)
+
     
     const {
         control,
@@ -71,12 +75,12 @@ const SignUpForm = () => {
     const onSubmit = async (form_data: FormData) => {
         setLoading(true)        
 
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
             email: form_data.email.trimEnd(),
             password: form_data.password,
             options: {
                 data: {
-                    name: form_data.name.trim()
+                    username: form_data.name.trim()
                 }
             }
         })
@@ -84,21 +88,31 @@ const SignUpForm = () => {
         setLoading(false)
         
         if (error) {
-            Toast.show({title: "Error", message: error.message, type: "error"})        
+            Toast.show({title: "Error", message: 'username already taken', type: "error"})        
             return
         }
             
-        const session = await spGetSession()
+        const session = await spGetSession()        
 
-        if (session) {                
-            supabase.auth.signOut()
-            Toast.show({title: 'Success', message: '', type: 'success'})
-            await sleep(2000)
-            router.replace("/(tabs)/profile")
-        } else {
+        if (!session) {
             Toast.show({title: "Error", message: "could not retrive login session", type: "error"})
+            logout()
+            await supabase.auth.signOut()
+            return
         }
-
+        
+                        
+        const user: AppUser | null = await spGetUser(session.user.id)
+        if (!user) {
+            Toast.show({title: "Error", message: "could not retrive login session", type: "error"})
+            return
+        } 
+        
+        Toast.show({title: `Welcome, ${form_data.name.trim()} 👋`, message: 'Account created', type: 'success'})
+        login(session, user)
+        await sleep(2000)
+        router.replace("/(tabs)/database")
+    
     };
 
   return (
@@ -111,9 +125,9 @@ const SignUpForm = () => {
                 name="name"
                 render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
-                    style={styles.input}                    
+                    style={styles.input}
                     autoComplete='name'
-                    autoCapitalize='words'                    
+                    autoCapitalize='none'                    
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}/>

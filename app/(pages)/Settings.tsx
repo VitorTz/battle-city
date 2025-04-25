@@ -1,17 +1,16 @@
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import React from 'react'
 import { AppStyle } from '@/style/AppStyle'
 import TopBar from '@/components/TopBar'
-import React from 'react'
 
-
-const Collection = () => {
+const Settings = () => {
   return (
-    <SafeAreaView style={AppStyle.safeArea}>
-      <TopBar title='Collection' showButton={false} />
+    <SafeAreaView style={AppStyle.safeArea} >
+        <TopBar title='Settings'/>
     </SafeAreaView>
   )
 }
 
-export default Collection
+export default Settings
 
 const styles = StyleSheet.create({})

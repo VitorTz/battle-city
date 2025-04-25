@@ -94,7 +94,8 @@ const SignInForm = ({onSignIn}: SignInFormProps) => {
     };
 
   return (
-    <KeyboardAvoidingView style={{width: '100%', gap: 20}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
+    <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
         <ScrollView style={{width: '100%'}} >
             {/* Email */}
             <Text style={styles.inputHeaderText}>Email</Text>

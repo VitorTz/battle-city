@@ -13,7 +13,6 @@ import { icons } from '@/helpers/icons'
   
 const TabBarButton = (props: any) => { 
     const {isFocused, label, routeName, color} = props
-  
     const scale = useSharedValue(0)
   
     useEffect(

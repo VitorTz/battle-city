@@ -1,11 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, SafeAreaView, Text, View } from 'react-native'
+import { AppStyle } from '@/style/AppStyle'
 import React from 'react'
+import TopBar from '@/components/TopBar'
 
 const Database = () => {
   return (
-    <View>
-      <Text>Database</Text>
-    </View>
+    <SafeAreaView style={AppStyle.safeArea}>
+      <TopBar title='Database' showButton={false} />
+    </SafeAreaView>
   )
 }
 

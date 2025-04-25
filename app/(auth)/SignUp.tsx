@@ -11,7 +11,7 @@ const SignUp = () => {
         <SafeAreaView style={AppStyle.safeArea} >
             <TopBar 
                 title='SignUp' 
-                onPress={() => router.replace('/(tabs)/database')} 
+                onPress={() => router.replace('/database')} 
                 iconName='return-down-back'/>        
             <SignUpForm/>
         </SafeAreaView>

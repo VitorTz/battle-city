@@ -8,7 +8,7 @@ import React from 'react'
 
 const SignIn = () => {  
     return (
-        <SafeAreaView style={AppStyle.safeArea} >
+        <SafeAreaView style={[AppStyle.safeArea, {flex: 1}]} >
             <TopBar 
                 title='SignIn' 
                 onPress={() => router.replace('/(tabs)/database')} 

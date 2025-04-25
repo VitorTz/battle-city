@@ -20,20 +20,13 @@ import {
     LeagueSpartan_900Black,
 } from '@expo-google-fonts/league-spartan'
 import { router } from 'expo-router'
+import { useAuthStore } from '@/store/authStore'
 
-
-AppState.addEventListener(
-    'change', (state) => {  
-        if (state === 'active') {    
-            supabase.auth.startAutoRefresh()  
-        } else {    
-            supabase.auth.stopAutoRefresh()  
-        }
-    }
-)
 
 
 const App = () => {
+
+    const { login, logout } = useAuthStore()
 
     let [fontsLoaded] = useFonts({
         LeagueSpartan_100Thin,
@@ -51,15 +44,28 @@ const App = () => {
     const init = async () => {
         const session = await spGetSession()
 
-        if (session) {
-            const user_id: string = session.user.id
-            const user = await spGetUser(user_id)
-            await spUpdateUserLastLogin(user_id)
+        if (!session) {
+            console.log("no session")
+            logout()
             router.replace("/(tabs)/database")
             return
         }
 
-        router.replace("/(auth)/SignIn")
+        
+        const user = await spGetUser(session?.user.id)
+
+        if (!user) {
+            console.log("no user")
+            logout()
+            await supabase.auth.signOut()
+            router.replace("/(tabs)/database")
+            return
+        }
+
+        console.log("login")
+        login(session, user)
+        await spUpdateUserLastLogin(session.user.id)
+        router.replace("/(tabs)/database")
 
     }
 
