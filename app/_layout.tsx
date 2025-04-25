@@ -18,6 +18,11 @@ const _layout = () => {
             <Stack.Screen name='(pages)/ChangeProfileIcon' options={{headerShown: false}} />
             <Stack.Screen name='(pages)/ChangeProfileInfo' options={{headerShown: false}} />
             <Stack.Screen name='(pages)/Settings' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/DeckDatabase' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/CardDatabase' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/LimitedCards' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/MatchHistory' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/FindUsers' options={{headerShown: false}} />
         </Stack>
         <Toast.Component/>
         <DialogMessage.Component/>

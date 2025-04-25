@@ -31,6 +31,7 @@ export const AppConstants = {
     },
     maxDeckDescrLenght: 5000,
     githubUrl: "https://github.com/VitorTz/battle-city",
+    ygoRuleLink: "https://www.yugioh-card.com/en/downloads/rulebook/SD_RuleBook_EN_10.pdf",
     profileOptions: [
         {
           title: "Profile",

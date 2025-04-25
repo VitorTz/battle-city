@@ -5,7 +5,8 @@ export const icons = {
     stats: "pie-chart-outline",
     collection: "layers-outline",
     news: "newspaper-outline",
-    profile: "person-circle-outline"
+    profile: "person-circle-outline",
+    explore: "planet-outline"
 };
 
 
@@ -17,4 +18,6 @@ export const IMAGE_ICON = new Map<string, any>([
     ["MangaView", require("@/assets/bg/blue_eyes-modified.png")],
     ["MatchHistory", require("@/assets/bg/obelisk_the_tormentor.png")],
     ["Rule", require("@/assets/bg/yami_yugi__official_artwork.png")],
+    ["MatchHistoryMonsterView", require('@/assets/bg/el_shaddoll_construct.png')],
+    ["Kaiba", require("@/assets/images/kaiba.png")]
 ])
