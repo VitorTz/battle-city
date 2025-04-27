@@ -1,8 +1,13 @@
+import { AppConstants } from "@/constants/AppConstants";
 import { AppUser } from "@/types/AppUser";
+import { Card } from "@/types/Card";
+import { CardSearchOptions } from "@/types/CardOptions";
 import { ImageDB } from "@/types/ImageDB";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { orderCards } from "@/helpers/util";
 import { createClient, PostgrestError, Session } from '@supabase/supabase-js'
 import { AppState } from "react-native";
+import { Prices } from "@/types/Prices";
 
 
 const supabaseUrl = 'https://mlhjkqlgzlkvtqjngzdr.supabase.co'
@@ -34,7 +39,7 @@ export async function spGetSession(): Promise<Session | null> {
 }
 
 export async function spUpdateUserLastLogin(user_id: string) {
-    const { data, error } = await supabase
+    const { error } = await supabase
         .from("users")    
         .update({last_login_at: 'now()'})
         .eq("user_id", user_id)
@@ -50,7 +55,7 @@ export async function spGetUser(user_id: string): Promise<AppUser | null> {
         .select("username, image_id, images (image_url) ")
         .eq("user_id", user_id)
         .single()
-
+    
     if (error) {
         console.log("error spGetUser", error)
         return null
@@ -58,10 +63,11 @@ export async function spGetUser(user_id: string): Promise<AppUser | null> {
 
     return {
         username: data.username, 
-        image: {
+        image: data.image_id ? {
             image_id: data.image_id, 
             image_url: (data.images as any).image_url
-        }}
+        } : null
+    }
 }
 
 
@@ -110,4 +116,151 @@ export async function spGetRandomTrivia(): Promise<string | null> {
     }
 
     return data
+}
+
+
+export async function spFetchCards(options: CardSearchOptions) {
+    let query = supabase
+        .from('cards')
+        .select('*')
+
+    if (options.name && options.name != '') {
+        query = query.ilike("name", `%${options.name}%`)
+    }
+    
+    if (options.archetypes.length > 0) {
+        const r = options.archetypes.map((item: string) => `archetype.eq.${item}`).join(',')
+        query = query.or(r)
+    }
+
+    if (options.attributes.length > 0) {
+        const r = options.attributes.map((item: string) => `attribute.eq.${item}`).join(',')
+        query = query.or(r)
+    }
+
+    if (options.frametypes.length > 0) {
+        const r = options.frametypes.map((item: string) => `frametype.eq.${item}`).join(',')
+        query = query.or(r)
+    }
+
+    if (options.races.length > 0) {
+        const r = options.races.map((item: string) => `race.eq.${item}`).join(',')
+        query = query.or(r)
+    }
+
+    if (options.types.length > 0) {
+        const r = options.types.map((item: string) => `card_type.eq.${item}`).join(',')
+        query = query.or(r)
+    }
+        
+    query = query.order(
+        options.sortBy,
+        {ascending: options.sortOrder == 'ASC', nullsFirst: false}
+    )
+
+    const {data, error} = await query
+        .range(options.page * AppConstants.CARD_FETCH_LIMIT, ((options.page + 1) * AppConstants.CARD_FETCH_LIMIT) - 1)
+        .overrideTypes<Card[]>()
+
+    if (error) { 
+        console.log("error while fetching cards", options, '\n', error)
+    }
+
+    return data ? data : []    
+}
+
+export async function supabaseAddCardToUserCollection(
+    user_id: string,
+    card_id: number, 
+    total: number = 1
+): Promise<boolean> {
+
+    const { error } = await supabase.rpc('insert_user_card', {
+        p_card_id: card_id,
+        p_user_id: user_id,
+        p_quantity: total
+    })
+
+    if (error) {
+        console.log(error)
+        return false
+    }
+
+    return true
+}
+
+
+export async function supabaseRmvCardFromUserCollection(
+    user_id: string,
+    card_id: number, 
+    total: number = 1
+): Promise<boolean> {
+
+    const { error } = await supabase.rpc('remove_user_card', {
+        p_card_id: card_id,
+        p_user_id: user_id,
+        p_quantity: total
+    })
+
+    if (error) {
+        console.log(error)
+        return false
+    }
+
+    return true
+}
+
+export async function fetchUserCards(user_id: string): Promise<Card[]> {
+    const { data, error } = await supabase
+        .from("user_cards")
+        .select("total, cards (*)")
+        .eq("user_id", user_id)
+
+    if (error) { 
+        console.log("error fetchUserCards", error)
+    }
+    
+    let cards: Card[] = []
+    data?.forEach(item => cards.push({num_copies: item.total, ...item.cards} as any))
+    return orderCards(cards)
+}
+
+
+export async function fetchRelatedCards(archetype: string | null): Promise<Card[]> {
+    const { data } = await supabase
+        .from("cards")
+        .select('*')
+        .eq("archetype", archetype)
+    return data ? orderCards(data as Card[]) : []
+}
+
+
+export async function spFetchCardPrices(card_id: number): Promise<Prices | null> {
+    const { data, error } = await supabase
+        .from("card_prices")
+        .select("card_market, tcg_player, ebay, amazon")
+        .eq("card_id", card_id)
+        .single()
+    
+    if (error) {
+        console.log("error spFetchCardPrices", card_id, error)
+    }
+
+    return data ? data : null
+        
+}
+
+
+export async function spCheckIfUsernameExists(username: string): Promise<boolean> {
+    const { data, error } = await supabase
+        .from("users")    
+        .select("username")
+        .eq("username", username)
+        .single()
+        
+    if (error) {
+        return false
+    }
+
+    return true
 }

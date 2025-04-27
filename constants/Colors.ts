@@ -22,10 +22,14 @@ export const Colors = {
   paleYellow: "#FFFDEC",
   clayDust: "#C4A79D",
   frostedBlue: "#D3E0F7",
+  emerald: "#60D394",
+  silver1: "#B5B6B0",
   
   limitedCardsColor: "#C14853",
   deckColor: "#4984A2",
   cardsColor: "#F24E4E",
-  packsColor: "#FF6740"
+  packsColor: "#FF6740",
+  newsColors: "#60D394",
+  tournamentsColors: "#B5B6B0"
 
 };

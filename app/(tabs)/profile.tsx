@@ -54,7 +54,7 @@ const Profile = () => {
   useEffect(
     () => {
       if (!session) {
-        router.navigate("/SignIn")
+        router.replace("/SignIn")
       }
     },
     [session]
@@ -68,7 +68,11 @@ const Profile = () => {
         <View style={{flex: 1, marginTop: hp(5), gap: 20}} >          
           <View style={styles.profileIconContainer} >
             <View>
-              <Image source={user.image.image_url} style={styles.image} />
+              {
+                user.image ?
+                <Image source={user.image.image_url} style={styles.image} /> :
+                <Ionicons name='person-circle' size={200} color={Colors.white} />
+              }
               <Pressable 
                   style={styles.brush}
                   onPress={() => router.navigate("/(pages)/ChangeProfileIcon")} 
@@ -130,9 +134,9 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   image: {
-    width: 128,
-    height: 128,
-    borderRadius: 128    
+    width: 200,
+    height: 200,
+    borderRadius: 200
   },
   brush: {
     position: 'absolute',

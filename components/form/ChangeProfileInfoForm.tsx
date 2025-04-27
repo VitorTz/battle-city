@@ -9,18 +9,15 @@ import {
     Text, 
     View 
 } from 'react-native'
-import { supabase, spGetSession, spGetUser, spCheckIfUsernameExists } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Colors } from '../../constants/Colors';
-import { router } from 'expo-router';
 import Toast from '../Toast';
 import { useState } from 'react'
 import * as yup from 'yup';
 import React from 'react'
-import { sleep } from '@/helpers/util';
 import { useAuthStore } from '@/store/authStore';
-import { AppUser } from '@/types/AppUser';
 
 
 const schema = yup.object().shape({  
@@ -32,29 +29,18 @@ const schema = yup.object().shape({
     email: yup
         .string()
         .email('Please enter a valid email')
-        .required('Email is required'),
-    password: yup
-        .string()
-        .min(3, 'Password must be at least 3 characters')
-        .required('Password is required'),  
-    confirmPassword: yup
-        .string()
-        .oneOf([yup.ref('password')], 'Password must be the same')
-        .required('Password is required')
+        .required('Email is required')
 });
 
 interface FormData {
     name: string
     email: string
-    password: string
-    confirmPassword: string
 }
 
 
+const ChangeProfileInfoForm = () => {
 
-const SignUpForm = () => {
-
-    const { login, logout } = useAuthStore()
+    const { session, user, setUsername } = useAuthStore()
     const [isLoading, setLoading] = useState(false)
 
     
@@ -64,55 +50,43 @@ const SignUpForm = () => {
         formState: { errors },
     } = useForm<FormData>({
         resolver: yupResolver(schema),
-        defaultValues: {            
-            name: '',
-            email: '',
-            password: '',
-            confirmPassword: ''
+        defaultValues: {
+            email: session && session.user.email ? session.user.email : '',
+            name: user ? user.username : ''
         },
     });
     
     const onSubmit = async (form_data: FormData) => {
-        setLoading(true)        
+        if (!session || !user) {
+            Toast.show({title: "Error", message: "You are not logged!", type: "error"})
+            return
+        }
 
-        const username = form_data.name.trim()
-        
-        const { data, error } = await supabase.auth.signUp({
-            email: form_data.email.trimEnd(),
-            password: form_data.password,
-            options: {
-                data: { username }
-            }
-        })
+        const newUsername = form_data.name.trim()
+
+        setLoading(true)
+
+        const { error } = await supabase
+            .from("users")
+            .update({"username": newUsername})
+            .eq("user_id", session.user.id)
+
+        setLoading(false)
 
         if (error) {
+            switch (error.code) {
+                case "23505":
+                    Toast.show({title: "Error", message: "Username already exists!", type: "error"})
+                    break
+                default:
+                    Toast.show({title: "Error", message: error.message, type: "error"})
+            }
             console.log(error)
-            Toast.show({title: "Error", message: error.message, type: "error"})
-            setLoading(false)
-            return
-        }
-
-        if (!data.session) {
-            Toast.show({title: "Error", message: "could not retrive login session", type: "error"})
-            setLoading(false)
-            logout()
-            await supabase.auth.signOut()
-            return
+        } else {
+            setUsername(newUsername)
+            Toast.show({title: "Success!", message: '', type: "success"})
         }
         
-        console.log(data.session)
-        const user = await spGetUser(data.session.user.id)
-
-        if (!user) {
-            Toast.show({title: "Error", message: '', type: "error"})
-            setLoading(false)
-            return 
-        }
-            
-        setLoading(false)
-        login(data.session, user)
-        Toast.show({title: `Welcome, ${username} 👋`, message: 'Account created', type: 'success'})
-        router.replace("/(tabs)/database")    
     };
 
   return (
@@ -134,6 +108,7 @@ const SignUpForm = () => {
                 )}
             />
             {errors.name && (<Text style={styles.error}>{errors.name.message}</Text>)}
+
             {/* Email */}
             <Text style={styles.inputHeaderText}>Email</Text>
             <Controller
@@ -151,63 +126,20 @@ const SignUpForm = () => {
             />
             {errors.email && (<Text style={styles.error}>{errors.email.message}</Text>)}
             
-            {/* Password */}
-            <Text style={styles.inputHeaderText}>Password</Text>
-            <Controller
-                name="password"
-                control={control}
-                render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                    style={styles.input}
-                    secureTextEntry
-                    autoCapitalize="none"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}/>
-                )}
-            />
-            {errors.password && (<Text style={styles.error}>{errors.password.message}</Text>)}
-
-            {/* Confirm Password */}
-            <Text style={styles.inputHeaderText}>Confirm password</Text>
-            <Controller
-                name="confirmPassword"
-                control={control}
-                render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                    style={styles.input}
-                    secureTextEntry
-                    autoCapitalize="none"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}/>
-                )}
-            />
-            {errors.confirmPassword && (<Text style={styles.error}>{errors.confirmPassword.message}</Text>)}
-
             {/* Login Button */}
             <Pressable onPress={handleSubmit(onSubmit)} style={styles.formButton} >
                 {
                     isLoading ? 
                     <ActivityIndicator size={32} color={Colors.white} /> :
-                    <Text style={styles.formButtonText} >Register</Text>
+                    <Text style={styles.formButtonText} >Save</Text>
                 }
             </Pressable>
-
-        <View style={{flexDirection: "row", marginTop: 20, gap: 4}} >
-            <Text style={{color: Colors.orange, fontSize: 14}} >Already Have an Account?</Text> 
-            <Pressable onPress={() => router.replace("/(tabs)/profile")}  hitSlop={{left: 10, top: 10, bottom: 10, right: 10}} >
-                <Text style={{textDecorationLine: "underline", fontWeight: "bold", color: Colors.orange, fontSize: 14}} >
-                    Sign In
-                </Text> 
-            </Pressable>
-        </View>
         </ScrollView>
     </KeyboardAvoidingView>
   )
 }
 
-export default SignUpForm
+export default ChangeProfileInfoForm
 
 const styles = StyleSheet.create({
     input: {

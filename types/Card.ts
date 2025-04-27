@@ -10,7 +10,7 @@ export type Card = {
     attribute: string | null
     frametype: string | null
     race: string | null
-    type: string | null
+    card_type: string | null
     descr: string
     image_url: string
     cropped_image_url: string

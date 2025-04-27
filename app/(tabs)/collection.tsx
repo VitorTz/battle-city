@@ -16,7 +16,7 @@ const DATA: LinkContainerData[] = [
     imageKey: "DeckMonsterView"
   },
   {
-    onPress: () => router.navigate("/(pages)/CardDatabase"),
+    onPress: () => router.navigate("/(pages)/CardCollection"),
     color: Colors.cardsColor,
     title: "Cards",
     imageKey: "CardMonsterView",

@@ -2,19 +2,15 @@ import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { AppStyle } from '@/style/AppStyle'
 import TopBar from '@/components/TopBar'
-import ChangeProfileInfoForm from '@/components/form/ChangeProfileInfoForm'
 
-
-const ChangeProfileInfo = () => {
+const CardCollection = () => {
   return (
     <SafeAreaView style={[AppStyle.safeArea, {paddingBottom: 10}]} >
-      <TopBar title='Profile info' />
-      <ChangeProfileInfoForm/>
+        <TopBar title='Card Collection' />
     </SafeAreaView>
   )
 }
 
-
-export default ChangeProfileInfo
+export default CardCollection
 
 const styles = StyleSheet.create({})

@@ -18,7 +18,7 @@ interface TopBarInterface {
 
 const TopBar = ({title, showButton = true, onPress = () => router.back(), iconName = 'return-down-back'}: TopBarInterface) => {
   return (
-    <View style={{width: '100%', alignItems: "center", flexDirection: 'row', justifyContent: "space-between"}} >
+    <View style={styles.container} >
         <Text style={[AppStyle.textRegularLarge, {fontSize: 28}]}>{title}</Text>
         {
           showButton &&
@@ -33,4 +33,12 @@ const TopBar = ({title, showButton = true, onPress = () => router.back(), iconNa
 export default TopBar
 
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    width: '100%', 
+    alignItems: "center", 
+    flexDirection: 'row', 
+    justifyContent: "space-between",
+    marginBottom: 10
+  }
+})

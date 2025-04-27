@@ -1,10 +1,15 @@
 import { 
-    SafeAreaView, 
-    AppState, 
+    SafeAreaView,
     ActivityIndicator, 
     StyleSheet 
 } from 'react-native'
-import { supabase, spGetSession, spGetUser, spUpdateUserLastLogin } from '@/lib/supabase'
+import { 
+    supabase, 
+    spGetSession, 
+    spGetUser, 
+    spUpdateUserLastLogin, 
+    fetchUserCards
+} from '@/lib/supabase'
 import React, { useEffect } from 'react'
 import { AppStyle } from '@/style/AppStyle'
 import {
@@ -21,12 +26,14 @@ import {
 } from '@expo-google-fonts/league-spartan'
 import { router } from 'expo-router'
 import { useAuthStore } from '@/store/authStore'
+import { useUserCardStore } from '@/store/userCardState'
 
 
 
 const App = () => {
 
-    const { login, logout } = useAuthStore()
+    const { login, logout, setUserLoading } = useAuthStore()
+    const { setCards } = useUserCardStore()
 
     let [fontsLoaded] = useFonts({
         LeagueSpartan_100Thin,
@@ -40,39 +47,40 @@ const App = () => {
         LeagueSpartan_900Black,
     })
 
-
-    const init = async () => {
+    const loginUser = async () => {
+        console.log("start login attempt")
+        setUserLoading(true)
         const session = await spGetSession()
 
         if (!session) {
             console.log("no session")
             logout()
-            router.replace("/(tabs)/database")
+            setUserLoading(false)
             return
         }
-
         
-        const user = await spGetUser(session?.user.id)
-
+        const user = await spGetUser(session.user.id)
+        
         if (!user) {
             console.log("no user")
             logout()
+            setUserLoading(false)
             await supabase.auth.signOut()
-            router.replace("/(tabs)/database")
             return
         }
 
-        console.log("login")
         login(session, user)
+        setUserLoading(false)
+        await fetchUserCards(session.user.id).then(values => setCards(values))
         await spUpdateUserLastLogin(session.user.id)
-        router.replace("/(tabs)/database")
-
+        console.log("user logged")
     }
 
     useEffect(
         () => {
             if (fontsLoaded) {
-                init()
+                loginUser()
+                router.replace("/(tabs)/database")
             }
         }, 
         [fontsLoaded]

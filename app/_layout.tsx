@@ -22,7 +22,11 @@ const _layout = () => {
             <Stack.Screen name='(pages)/CardDatabase' options={{headerShown: false}} />
             <Stack.Screen name='(pages)/LimitedCards' options={{headerShown: false}} />
             <Stack.Screen name='(pages)/MatchHistory' options={{headerShown: false}} />
-            <Stack.Screen name='(pages)/FindUsers' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/Duelists' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/News' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/Tournaments' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/Card' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/CardCollection' options={{headerShown: false}} />
         </Stack>
         <Toast.Component/>
         <DialogMessage.Component/>

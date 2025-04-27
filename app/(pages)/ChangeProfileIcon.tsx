@@ -11,6 +11,7 @@ import { useAuthStore } from '@/store/authStore'
 import { ImageDB } from '@/types/ImageDB'
 import Toast from '@/components/Toast'
 import { PostgrestError } from '@supabase/supabase-js'
+import { Ionicons } from '@expo/vector-icons'
 
 
 const ChangeProfileIcon = () => {
@@ -58,7 +59,7 @@ const ChangeProfileIcon = () => {
     }
 
     return (
-        <SafeAreaView style={AppStyle.safeArea} >
+        <SafeAreaView style={[AppStyle.safeArea, {paddingBottom: 10}]} >
             <TopBar 
                 title='Profile Icon' 
                 onPress={() => router.back()} 
@@ -71,8 +72,8 @@ const ChangeProfileIcon = () => {
                 :
                 <View style={{flex: 1, marginTop: 20}} >
                     {
-                        currentImage &&
-                        <View style={{width: '100%', alignItems: "center", justifyContent: "center"}} >
+                        currentImage ?
+                        <View style={{width: '100%', alignItems: "center", justifyContent: "center", marginBottom: 20}} >
                             <Image source={currentImage.image_url} style={styles.currentIconImage} />
                             <Pressable onPress={saveChanges} style={styles.button} >
                                 {
@@ -83,6 +84,11 @@ const ChangeProfileIcon = () => {
                                 }
                             </Pressable>
                         </View>
+                        :
+                        <View style={{alignSelf: "center"}} >
+                            <Ionicons name='person-circle' size={128} color={Colors.white}/>
+                        </View>
+
                     }
                     <ScrollView style={{flex: 1}} >
                         <View style={styles.grid} >
@@ -106,9 +112,9 @@ export default ChangeProfileIcon
 
 const styles = StyleSheet.create({
     iconImage: {
-        width: 48,
-        height: 48,
-        borderRadius: 48
+        width: 80,
+        height: 80,
+        borderRadius: 80
     },
     currentIconImage: {
         width: 128,
@@ -116,13 +122,12 @@ const styles = StyleSheet.create({
         borderRadius: 128
     },
     grid: {
-        marginTop: 20,
         width: '100%', 
         flexDirection: 'row', 
         flexWrap: 'wrap', 
         gap: 10,
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "space-between"
     },
     button: {
         position: 'absolute',

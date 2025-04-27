@@ -87,10 +87,10 @@ const SignInForm = ({onSignIn}: SignInFormProps) => {
             } else {
                 supabase.auth.signOut()
             }
-            
         } else {
             Toast.show({title: "Error", message: "could not retrive login session", type: "error"})
-        }        
+        }
+
     };
 
   return (

@@ -7,13 +7,18 @@ import React from 'react'
 
 
 const SignIn = () => {  
+
+    const signIn = () => {
+        router.replace("/(tabs)/database")
+    }
+
     return (
         <SafeAreaView style={[AppStyle.safeArea, {flex: 1}]} >
             <TopBar 
                 title='SignIn' 
                 onPress={() => router.replace('/(tabs)/database')} 
                 iconName='return-down-back'/>        
-            <SignInForm/>
+            <SignInForm onSignIn={signIn} />
         </SafeAreaView>
   )
 }
