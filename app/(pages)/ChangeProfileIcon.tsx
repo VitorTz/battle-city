@@ -62,7 +62,7 @@ const ChangeProfileIcon = () => {
             <TopBar 
                 title='Profile Icon' 
                 onPress={() => router.back()} 
-                iconName='return-down-back'/>        
+                iconName='return-down-back'/>
             {
                 loading ?
                 <View style={{flex: 1, alignItems: "center", justifyContent: "center"}} >
