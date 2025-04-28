@@ -70,9 +70,9 @@ const App = () => {
         }
 
         login(session, user)
-        setUserLoading(false)
         await fetchUserCards(session.user.id).then(values => setCards(values))
-        await spUpdateUserLastLogin(session.user.id)
+        setUserLoading(false)
+        spUpdateUserLastLogin(session.user.id)
         console.log("user logged")
     }
 

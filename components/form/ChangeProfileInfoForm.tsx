@@ -18,6 +18,7 @@ import { useState } from 'react'
 import * as yup from 'yup';
 import React from 'react'
 import { useAuthStore } from '@/store/authStore';
+import TagSelector from '../TagSelector';
 
 
 const schema = yup.object().shape({  
@@ -92,6 +93,7 @@ const ChangeProfileInfoForm = () => {
   return (
     <KeyboardAvoidingView style={{width: '100%', gap: 20}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
         <ScrollView style={{width: '100%'}} >
+            <TagSelector/>
             {/* Name */}
             <Text style={styles.inputHeaderText}>Username</Text>
             <Controller

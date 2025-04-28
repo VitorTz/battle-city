@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { Card } from "@/types/Card";
 import { TagUser } from "@/types/UserTag";
 
 
