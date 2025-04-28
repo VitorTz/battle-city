@@ -1,9 +1,9 @@
+import { supabaseAddCardToUserCollection, supabaseRmvCardFromUserCollection } from '@/lib/supabase'
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { Colors } from '@/constants/Colors'
 import { AppStyle } from '@/style/AppStyle'
 import { Ionicons } from '@expo/vector-icons'
-import { supabaseAddCardToUserCollection, supabaseRmvCardFromUserCollection } from '@/lib/supabase'
 import { Card } from '@/types/Card'
 import Toast from './Toast'
 import { useUserCardStore } from '@/store/userCardState'
@@ -16,18 +16,7 @@ const AddCardToUserCollection = ({card}: {card: Card}) => {
     const { session } = useAuthStore()
     const { cards, addCard, deleteCard } = useUserCardStore()
     const [loading, setLoading] = useState(false)
-    const [total, setTotal] = useState(0)
-    const card_id: number = parseInt(card.card_id as any)
-    
-    const init = () => {
-        const num = cards.get(card_id)?.num_copies
-        setTotal(num ? num : 0)
-    }
-
-    useEffect(
-        () => { init() },
-        [card]
-    )
+    const [total, setTotal] = useState(cards.get(card.card_id) ? cards.get(card.card_id)!.num_copies : 0)
 
     const add = async () => {        
         if (!session) {
@@ -47,12 +36,11 @@ const AddCardToUserCollection = ({card}: {card: Card}) => {
     }
 
     const rmv = async () => {
-        const num_copies = cards.get(card.card_id) ? cards.get(card.card_id)!.num_copies : 0
         if (!session) {
             Toast.show({title: "Error", message: "You are not logged!", type: "error"})
             return
         }        
-        if (num_copies == 0) {
+        if (total == 0) {
             Toast.show({title: "Warning", message: "You dont have this card in your collection", type: "info"})
             return
         }
@@ -60,13 +48,13 @@ const AddCardToUserCollection = ({card}: {card: Card}) => {
         await supabaseRmvCardFromUserCollection(session.user.id, card.card_id)
             .then(success => {
                 if (success) {
-                    if (num_copies == 1) {
+                    const newTotal = total - 1
+                    if (newTotal == 0) {
                         deleteCard(card)
                     } else {
-                        card.num_copies = num_copies - 1
-                        deleteCard(card)
+                        addCard({...card, num_copies: newTotal})
                     }
-                    setTotal(num_copies - 1)
+                    setTotal(newTotal)
                 }}
             )
         setLoading(false)

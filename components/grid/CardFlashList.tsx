@@ -48,7 +48,7 @@ const CardFlashList = ({
                 numColumns={numColumns}
                 keyExtractor={(card, index) => index.toString()}
                 onEndReached={onEndReached}
-                onEndReachedThreshold={0.5}                
+                onEndReachedThreshold={0.5}
                 estimatedItemSize={height}
                 ListFooterComponent={<CustomGridFooter loading={loading} hasResults={hasResults}/>}
                 renderItem={

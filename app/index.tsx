@@ -60,7 +60,7 @@ const App = () => {
         }
         
         const user = await spGetUser(session.user.id)
-        
+        console.log(user)
         if (!user) {
             console.log("no user")
             logout()

@@ -8,6 +8,9 @@ import { orderCards } from "@/helpers/util";
 import { createClient, PostgrestError, Session } from '@supabase/supabase-js'
 import { AppState } from "react-native";
 import { Prices } from "@/types/Prices";
+import { Duelist } from "@/types/Duelist";
+import { DuelistOptions } from "@/types/DuelistOptions";
+import { TagUser } from "@/types/UserTag";
 
 
 const supabaseUrl = 'https://mlhjkqlgzlkvtqjngzdr.supabase.co'
@@ -49,10 +52,29 @@ export async function spUpdateUserLastLogin(user_id: string) {
     }
 }
 
+export async function spGetUserTags(user_id: string): Promise<TagUser[]> {
+    const { data, error } = await supabase
+        .from("user_tags")
+        .select("tag_id, tags (name, descr)")
+        .eq("user_id", user_id)
+        
+    if (error) {
+        console.log("error spGetUserTags", error)
+        return []
+    }
+
+    return data.map(item => {return {
+        name: (item.tags as any).name,
+        descr: (item.tags as any).descr,
+        tag_id: item.tag_id
+    }})
+}
+
+
 export async function spGetUser(user_id: string): Promise<AppUser | null> {
     const { data, error } = await supabase
         .from("users")
-        .select("username, image_id, images (image_url) ")
+        .select("username, bio, image_id, images (image_url), tags (tag_id, name, descr) ")
         .eq("user_id", user_id)
         .single()
     
@@ -62,11 +84,13 @@ export async function spGetUser(user_id: string): Promise<AppUser | null> {
     }
 
     return {
-        username: data.username, 
+        username: data.username,
+        bio: data.bio, 
         image: data.image_id ? {
             image_id: data.image_id, 
             image_url: (data.images as any).image_url
-        } : null
+        } : null,
+        tags: data.tags
     }
 }
 
@@ -264,3 +288,82 @@ export async function spCheckIfUsernameExists(username: string): Promise<boolean
 
     return true
 }
+
+
+export async function spFetchDuelists(
+    except: string | null | undefined, 
+    options: DuelistOptions
+): Promise<Duelist[]> {
+    let query = supabase
+        .from("users")
+        .select("user_id, username, bio, image_id, images (image_url), countries (country_name), tags (tag_id, name, descr)")
+    
+    if (except) {
+        query = query.neq("user_id", except)
+    }
+
+    if (options.country) {
+        const country_id: number | null = await spGetCountryId(options.country)
+        if (country_id) {
+            query = query.eq("country_id", country_id)
+        }
+    }
+
+    if (options.name) {
+        query = query.ilike("username", `%${options.name}%`)
+    }
+    
+    const { data, error } = await query
+        .range(options.page * AppConstants.USER_FETCH_LIMIT, ((options.page + 1) * AppConstants.USER_FETCH_LIMIT) - 1)
+        .order("username", {ascending: true})
+        .overrideTypes<Duelist[]>()
+
+    if (error) {
+        console.log("error spFetchDuelists", error)
+        return []
+    }
+
+    return data.map(
+        item => {return {
+            username: item.username,
+            user_id: item.user_id,
+            image: item.image_id ? {
+                image_id: item.image_id,
+                image_url: (item.images as any).image_url
+            } : null,
+            country: (item.countries as any).country_name,
+            bio: item.bio,
+            tags: []
+        }}
+    )
+}
+
+export async function spGetCountryId(country: string): Promise<number | null> {
+    const { data, error } = await supabase
+        .from("countries")
+        .select("country_id")
+        .eq("country_name", country)
+        .single()
+    
+    if (error) {
+        console.log("error spGetCountryId", error)
+        return null
+    }
+
+    return data.country_id
+}
+
+
+export async function spGetTags(): Promise<TagUser[]> {
+    const { data, error } = await supabase
+        .from("tags")
+        .select("*")
+        .overrideTypes<TagUser[]>()
+
+    if (error) {
+        console.log("error spGetTags", error)
+        return []
+    }
+
+    return data
+} 

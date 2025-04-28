@@ -9,6 +9,10 @@ import { Ionicons } from '@expo/vector-icons'
 import { Colors } from '@/constants/Colors'
 import { AppConstants } from '@/constants/AppConstants'
 import RandomTrivia from '@/components/RandomTrivia'
+import BaseUserProfileImage from '@/components/BaseUserProfileImage'
+import { useUserCardStore } from '@/store/userCardState'
+import { supabase } from '@/lib/supabase'
+import Toast from '@/components/Toast'
 
 
 interface OptionProps {
@@ -48,7 +52,8 @@ const Option = ({title, message, iconName, onPress}: OptionProps) => {
 
 const Profile = () => {
 
-  const { user, session } = useAuthStore()
+  const { user, session, logout } = useAuthStore()
+  const { setCards } = useUserCardStore()
 
 
   useEffect(
@@ -59,61 +64,71 @@ const Profile = () => {
     },
     [session]
   )
+
+  const handleLogout = async () => {
+    logout()
+    setCards([])
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.log("error handleLogout", error)
+    } else {
+      Toast.show({title: "Success!", message: '', type: 'success'})
+    }
+  }
   
 
   return (
     <SafeAreaView style={AppStyle.safeArea}>
       {
         user &&
-        <View style={{flex: 1, marginTop: hp(5), gap: 20}} >          
-          <View style={styles.profileIconContainer} >
-            <View>
-              {
-                user.image ?
-                <Image source={user.image.image_url} style={styles.image} /> :
-                <Ionicons name='person-circle' size={200} color={Colors.white} />
-              }
-              <Pressable 
-                  style={styles.brush}
-                  onPress={() => router.navigate("/(pages)/ChangeProfileIcon")} 
-                  hitSlop={AppConstants.hitSlopLarge} >
-                <Ionicons name='brush-outline' size={20} color={Colors.white} />
-              </Pressable>
+          <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false} >
+          <View style={{flex: 1, marginTop: hp(5), gap: 20, marginBottom: 20}} >
+            <View style={styles.profileIconContainer} >
+              <View>
+                {
+                  user.image ?
+                  <Image source={user.image.image_url} style={styles.image} /> :
+                  <BaseUserProfileImage/>
+                }
+                <Pressable 
+                    style={styles.brush}
+                    onPress={() => router.navigate("/(pages)/ChangeProfileIcon")} 
+                    hitSlop={AppConstants.hitSlopLarge} >
+                  <Ionicons name='brush-outline' size={20} color={Colors.white} />
+                </Pressable>
+              </View>
+              <Text style={AppStyle.textRegularLarge}>{user.username}</Text>
             </View>
-            <Text style={AppStyle.textRegularLarge}>{user.username}</Text>
-          </View>
+              <View style={styles.optionsContainer} >
+                  <Option 
+                    title='Profile' 
+                    message='username, email, password, bio' 
+                    iconName='person-circle-outline' 
+                    onPress={() => router.navigate("/(pages)/ChangeProfileInfo")} />
 
-          <ScrollView style={{flex: 1}} >
-            <View style={styles.optionsContainer} >
-                <Option 
-                  title='Profile' 
-                  message='username, email, password...' 
-                  iconName='person-circle-outline' 
-                  onPress={() => router.navigate("/(pages)/ChangeProfileInfo")} />
+                  <Option 
+                    title='Settings' 
+                    message='color theme' 
+                    iconName='settings-outline' 
+                    onPress={() => router.navigate("/(pages)/Settings")} />
 
-                <Option 
-                  title='Settings' 
-                  message='color theme...' 
-                  iconName='settings-outline' 
-                  onPress={() => router.navigate("/(pages)/Settings")} />
+                  <Option 
+                    title='Github'
+                    message='source code' 
+                    iconName='logo-github' 
+                    onPress={() => Linking.openURL(AppConstants.githubUrl)} />
 
-                <Option 
-                  title='Github'
-                  message='source code' 
-                  iconName='logo-github' 
-                  onPress={() => Linking.openURL(AppConstants.githubUrl)} />
+                  <Option 
+                    title='Logout'
+                    iconName='log-out-outline' 
+                    onPress={handleLogout} />
+              </View>
 
-                <Option 
-                  title='Logout'
-                  iconName='log-out-outline' 
-                  onPress={() => router.navigate("/(pages)/ChangeProfileInfo")} />
+              <RandomTrivia/>
+
             </View>
+        </ScrollView>
 
-            <RandomTrivia/>
-
-          </ScrollView>
-
-        </View>
       }
       
     </SafeAreaView>
@@ -130,8 +145,7 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   optionsContainer: {
-    gap: 22,
-    marginBottom: 20
+    gap: 20,
   },
   image: {
     width: 200,

@@ -12,6 +12,7 @@ import { ImageDB } from '@/types/ImageDB'
 import Toast from '@/components/Toast'
 import { PostgrestError } from '@supabase/supabase-js'
 import { Ionicons } from '@expo/vector-icons'
+import BaseUserProfileImage from '@/components/BaseUserProfileImage'
 
 
 const ChangeProfileIcon = () => {
@@ -86,7 +87,7 @@ const ChangeProfileIcon = () => {
                         </View>
                         :
                         <View style={{alignSelf: "center"}} >
-                            <Ionicons name='person-circle' size={128} color={Colors.white}/>
+                            <BaseUserProfileImage/>
                         </View>
 
                     }
@@ -117,9 +118,9 @@ const styles = StyleSheet.create({
         borderRadius: 80
     },
     currentIconImage: {
-        width: 128,
-        height: 128,
-        borderRadius: 128
+        width: 200,
+        height: 200,
+        borderRadius: 200
     },
     grid: {
         width: '100%', 

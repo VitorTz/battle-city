@@ -9,7 +9,7 @@ import {
     Text, 
     View 
 } from 'react-native'
-import { supabase, spGetSession, spGetUser, spCheckIfUsernameExists } from '@/lib/supabase';
+import { supabase, spGetSession, spGetUser, spCheckIfUsernameExists, spGetCountryId } from '@/lib/supabase';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Colors } from '../../constants/Colors';
@@ -18,9 +18,11 @@ import Toast from '../Toast';
 import { useState } from 'react'
 import * as yup from 'yup';
 import React from 'react'
-import { sleep } from '@/helpers/util';
+import { hp, sleep } from '@/helpers/util';
 import { useAuthStore } from '@/store/authStore';
 import { AppUser } from '@/types/AppUser';
+import CountryPicker from '../picker/CountryPicker';
+import { AppStyle } from '@/style/AppStyle';
 
 
 const schema = yup.object().shape({  
@@ -40,7 +42,10 @@ const schema = yup.object().shape({
     confirmPassword: yup
         .string()
         .oneOf([yup.ref('password')], 'Password must be the same')
-        .required('Password is required')
+        .required('Password is required'),
+    bio: yup
+        .string()
+        .max(1024, "Max 1024 characters")
 });
 
 interface FormData {
@@ -48,6 +53,7 @@ interface FormData {
     email: string
     password: string
     confirmPassword: string
+    bio: string
 }
 
 
@@ -56,38 +62,54 @@ const SignUpForm = () => {
 
     const { login, logout } = useAuthStore()
     const [isLoading, setLoading] = useState(false)
-
+    const [country, setCountry] = useState<string | null>(null)
     
     const {
         control,
         handleSubmit,
         formState: { errors },
     } = useForm<FormData>({
-        resolver: yupResolver(schema),
+        resolver: yupResolver(schema as any),
         defaultValues: {            
             name: '',
             email: '',
             password: '',
-            confirmPassword: ''
+            confirmPassword: '',
+            bio: ''
         },
     });
     
     const onSubmit = async (form_data: FormData) => {
-        setLoading(true)        
+
+        if (!country) {
+            Toast.show({title: "Warning!", message: "Pick a country", type: "info"})
+            return
+        }
+        
+        setLoading(true)
+        
+        const country_id: number | null = await spGetCountryId(country)
+        const bio = form_data.bio.trim()
+
+        if (!country_id) {
+            Toast.show({title: "Error", message: "You cannot pick this country", type: "error"})
+            setLoading(false)
+            return
+        }
 
         const username = form_data.name.trim()
-        
+
         const { data, error } = await supabase.auth.signUp({
             email: form_data.email.trimEnd(),
             password: form_data.password,
             options: {
-                data: { username }
+                data: { username, country_id, bio: bio != '' ? bio : null }
             }
         })
 
         if (error) {
             console.log(error)
-            Toast.show({title: "Error", message: error.message, type: "error"})
+            Toast.show({title: "Error", message: "username or email already taken", type: "error"})
             setLoading(false)
             return
         }
@@ -100,7 +122,6 @@ const SignUpForm = () => {
             return
         }
         
-        console.log(data.session)
         const user = await spGetUser(data.session.user.id)
 
         if (!user) {
@@ -184,6 +205,33 @@ const SignUpForm = () => {
                 )}
             />
             {errors.confirmPassword && (<Text style={styles.error}>{errors.confirmPassword.message}</Text>)}
+
+            {/* Bio */}
+            <View style={{flexDirection: 'row', gap: 10, alignItems: "center"}} >
+                <Text style={styles.inputHeaderText}>Bio</Text>
+                <Text style={[AppStyle.errorMsg, {alignSelf: "flex-start"}]}>optional</Text>
+            </View>
+            <Controller
+                name="bio"
+                control={control}
+                render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                    style={[styles.input, {height: hp(20), paddingTop: 10}]}
+                    autoCapitalize="sentences"
+                    enterKeyHint='done'
+                    onBlur={onBlur}
+                    textAlignVertical='top'
+                    multiline={true}
+                    maxLength={1024}
+                    onChangeText={onChange}
+                    value={value}/>
+                )}
+            />
+            {errors.bio && (<Text style={styles.error}>{errors.bio.message}</Text>)}
+
+
+            <Text style={styles.inputHeaderText}>Country</Text>
+            <CountryPicker setCountry={setCountry} />
 
             {/* Login Button */}
             <Pressable onPress={handleSubmit(onSubmit)} style={styles.formButton} >
