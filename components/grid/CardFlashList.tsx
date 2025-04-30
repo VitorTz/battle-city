@@ -17,6 +17,8 @@ interface CardFlashListProps {
     gap?: number
     onEndReached?: () => void
     onCardPress?: (card: Card) => void
+    paddingLeft?: number
+    showCardNumCopies?: boolean
 }
 
 
@@ -28,7 +30,9 @@ const CardFlashList = ({
     hasResults,
     padding = 10,
     gap = 10,
-    onCardPress
+    paddingLeft = 5,
+    onCardPress,
+    showCardNumCopies = false
 }: CardFlashListProps) => {
     
     const {width, height} = getItemGridDimensions(
@@ -40,7 +44,7 @@ const CardFlashList = ({
     )
     
     return (
-        <View style={{width: '100%', flex: 1, paddingLeft: 5}} >
+        <View style={{width: '100%', flex: 1, paddingLeft}} >
             <FlashList                
                 data={cards}
                 nestedScrollEnabled={true}
@@ -54,6 +58,7 @@ const CardFlashList = ({
                 renderItem={
                     ({ item }) => 
                         <CardItem 
+                        showNumCopies={showCardNumCopies}
                             onPress={onCardPress}
                             card={item}                         
                             width={width} 
