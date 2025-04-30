@@ -34,5 +34,19 @@ export const AppStyle = StyleSheet.create({
     errorMsg: {
         color: Colors.red,
         fontFamily: "LeagueSpartan_300Light"
+    },
+    formButton: {
+        width: '100%',
+        marginTop: 10,
+        alignItems: "center",
+        justifyContent: "center",
+        height: 50,
+        borderRadius: 4,
+        backgroundColor: Colors.orange
+    },
+    formButtonText: {
+        color: Colors.white,
+        fontSize: 22,
+        fontFamily: "LeagueSpartan_400Regular",
     }
 })

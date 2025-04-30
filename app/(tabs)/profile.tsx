@@ -13,6 +13,9 @@ import BaseUserProfileImage from '@/components/BaseUserProfileImage'
 import { useUserCardStore } from '@/store/userCardState'
 import { supabase } from '@/lib/supabase'
 import Toast from '@/components/Toast'
+import UserTagsList from '@/components/UserTagsList'
+import TopBar from '@/components/TopBar'
+import { useUserTagState } from '@/store/userTagState'
 
 
 interface OptionProps {
@@ -38,7 +41,7 @@ const Option = ({title, message, iconName, onPress}: OptionProps) => {
         <Ionicons name={iconName as any} size={32} color={Colors.white} />
         <View>
           <Text style={AppStyle.textRegular} >{title}</Text>
-          {message && <Text style={AppStyle.textRegular} >{message}</Text>}          
+          {message && <Text numberOfLines={1} style={AppStyle.textRegular} >{message}</Text>}          
         </View>
       </View>
       {
@@ -50,87 +53,105 @@ const Option = ({title, message, iconName, onPress}: OptionProps) => {
   )
 }
 
+const LoadingProfilePage = () => {
+  return (
+    <View style={{flex: 1, alignItems: "center", justifyContent: "center"}} >      
+      <ActivityIndicator size={'large'} color={Colors.white} />
+    </View>
+  )
+}
+
+
+
 const Profile = () => {
 
-  const { user, session, logout } = useAuthStore()
+  const { user, session, logout, userLoading } = useAuthStore()
   const { setCards } = useUserCardStore()
+  const { setUserTagMap } = useUserTagState()
 
 
   useEffect(
     () => {
-      if (!session) {
+      if (!userLoading && !session) {
         router.replace("/SignIn")
       }
     },
-    [session]
+    [userLoading]
   )
 
   const handleLogout = async () => {
     logout()
     setCards([])
+    setUserTagMap(new Map())
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.log("error handleLogout", error)
     } else {
       Toast.show({title: "Success!", message: '', type: 'success'})
     }
+    router.replace("/database")
   }
   
 
   return (
     <SafeAreaView style={AppStyle.safeArea}>
       {
-        user &&
-          <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false} >
-          <View style={{flex: 1, marginTop: hp(5), gap: 20, marginBottom: 20}} >
-            <View style={styles.profileIconContainer} >
-              <View>
-                {
-                  user.image ?
-                  <Image source={user.image.image_url} style={styles.image} /> :
-                  <BaseUserProfileImage/>
-                }
-                <Pressable 
-                    style={styles.brush}
-                    onPress={() => router.navigate("/(pages)/ChangeProfileIcon")} 
-                    hitSlop={AppConstants.hitSlopLarge} >
-                  <Ionicons name='brush-outline' size={20} color={Colors.white} />
-                </Pressable>
-              </View>
-              <Text style={AppStyle.textRegularLarge}>{user.username}</Text>
-            </View>
-              <View style={styles.optionsContainer} >
-                  <Option 
-                    title='Profile' 
-                    message='username, email, password, bio' 
-                    iconName='person-circle-outline' 
-                    onPress={() => router.navigate("/(pages)/ChangeProfileInfo")} />
+        userLoading ?
+        <LoadingProfilePage/> :
+        <>
+        {
+          user &&
+            <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false} >
+              <View style={{flex: 1, marginTop: 10, gap: 20, marginBottom: 20}} >
+                <View style={styles.profileIconContainer} >
+                  <View>
+                    {
+                      user.image ?
+                      <Image source={user.image.image_url} style={styles.image} /> :
+                      <BaseUserProfileImage/>
+                    }
+                    <Pressable 
+                        style={styles.brush}
+                        onPress={() => router.navigate("/(pages)/ChangeProfileIcon")} 
+                        hitSlop={AppConstants.hitSlopLarge} >
+                      <Ionicons name='brush-outline' size={20} color={Colors.white} />
+                    </Pressable>
+                  </View>
+                  <Text style={AppStyle.textRegularLarge}>{user.username}</Text>
+                  <UserTagsList/>
+                </View>
+                  <View style={styles.optionsContainer} >
+                      <Option 
+                        title='Profile' 
+                        message='username, email, password, bio...' 
+                        iconName='person-circle-outline' 
+                        onPress={() => router.navigate("/(pages)/ChangeProfileInfo")} />
 
-                  <Option 
-                    title='Settings' 
-                    message='color theme' 
-                    iconName='settings-outline' 
-                    onPress={() => router.navigate("/(pages)/Settings")} />
+                      <Option 
+                        title='Settings' 
+                        message='color theme' 
+                        iconName='settings-outline' 
+                        onPress={() => router.navigate("/(pages)/Settings")} />
 
-                  <Option 
-                    title='Github'
-                    message='source code' 
-                    iconName='logo-github' 
-                    onPress={() => Linking.openURL(AppConstants.githubUrl)} />
+                      <Option 
+                        title='Github'
+                        message='source code' 
+                        iconName='logo-github' 
+                        onPress={() => Linking.openURL(AppConstants.githubUrl)} />
 
-                  <Option 
-                    title='Logout'
-                    iconName='log-out-outline' 
-                    onPress={handleLogout} />
-              </View>
+                      <Option 
+                        title='Logout'
+                        iconName='log-out-outline' 
+                        onPress={handleLogout} />
+                  </View>
 
-              <RandomTrivia/>
+                  <RandomTrivia/>
 
-            </View>
-        </ScrollView>
-
+                </View>
+              </ScrollView>
+        }
+        </>
       }
-      
     </SafeAreaView>
   )
 }

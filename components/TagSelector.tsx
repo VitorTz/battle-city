@@ -1,22 +1,21 @@
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
-import React, { useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTagState } from '@/store/tagState'
-import { spGetTags, spGetUserTags } from '@/lib/supabase'
+import { spGetTags, spUpsertUserTags } from '@/lib/supabase'
 import { TagUser } from '@/types/UserTag'
 import { AppStyle } from '@/style/AppStyle'
 import { Colors } from '@/constants/Colors'
 import { useUserTagState } from '@/store/userTagState'
 import { useAuthStore } from '@/store/authStore'
+import Toast from './Toast'
+import { Ionicons } from '@expo/vector-icons'
+import { AppConstants } from '@/constants/AppConstants'
 
 
-const TagItem = ({tag}: {tag: TagUser}) => {
-    const [selected, setSelected] = useState(false)
+const TagItem = ({tag, isSelected, selectTag}: {tag: TagUser, isSelected: boolean, selectTag: (tag: TagUser) => void}) => {
     
-    const { addOrRemoveTag } = useUserTagState()
-
     const onPress = () => {
-        setSelected(prev => !prev)
-        addOrRemoveTag(tag.name)
+        selectTag(tag)
     }
 
     return (
@@ -26,7 +25,7 @@ const TagItem = ({tag}: {tag: TagUser}) => {
                 marginRight: 10, 
                 padding: 10,
                 borderRadius: 4, 
-                backgroundColor: selected ? Colors.orange : Colors.background
+                backgroundColor: isSelected ? Colors.orange : Colors.background
             }} >
             <Text style={AppStyle.textRegularLarge}>{tag.name}</Text>
             <Text style={AppStyle.textRegular}>{tag.descr}</Text>
@@ -36,55 +35,121 @@ const TagItem = ({tag}: {tag: TagUser}) => {
 
 const TagSelector = () => {
     
-    const { tags, setTags  } = useTagState()
-    const { userTags, setUserTags } = useUserTagState()
     const { session } = useAuthStore()
-
-    const init = async () => {
+    const { tags, setTags  } = useTagState()
+    const { userTagMap, setUserTagMap } = useUserTagState()
+    
+    const [loading, setLoading] = useState(false)
+    const [tmpTags, setTmpTags] = useState<Map<number, TagUser>>(new Map())
+    
+    const init = useCallback(async () => {
         if (tags.length == 0) {
             await spGetTags().then(values => setTags(values))
         }
-        if (session) {
-            await spGetUserTags(session.user.id)
-                .then(values => setUserTags(new Set(values.map(item => item.name))))
-        }
-    }
-    
+        setTmpTags(new Map(userTagMap))
+    }, [])
+
     useEffect(
-        useCallback(() => {
+        () => {
             init()
-        }, []),
+        },
         []
     )
-  
+
+    const saveTags = async () => {
+        if (!session) {
+            Toast.show({title: "Error", message: "You are not logged!", type: "error"})
+            return
+        }
+        setLoading(true)
+        const tagsIds: number[] = Array.from(tmpTags.values()).map(item => item.tag_id)
+        const success = await spUpsertUserTags(session.user.id, tagsIds)        
+        if (success) { 
+            setUserTagMap(tmpTags) 
+            Toast.show({title: "Success!", message: "", type: "success"})
+        }
+        setLoading(false)
+    }
+
+    const selectTag = (tag: TagUser) => {
+        setTmpTags(
+            prev => {
+                const n = new Map(prev)
+                n.has(tag.tag_id) ?
+                    n.delete(tag.tag_id) :
+                    n.set(tag.tag_id, tag)
+                return n
+            }
+        )
+    }
+
+    const clearUserTags = () => {
+        setTmpTags(new Map())
+    }
+
     return (
-        <View style={{width: '100%', gap: 20, backgroundColor: Colors.gray, borderRadius: 4, padding: 10}} >
+        <View style={styles.container} >
                 <Text style={[AppStyle.textRegularLarge, {color: Colors.orange, fontSize: 30}]}>All Tags</Text>
                 <FlatList
-                    contentOffset={{x: -120, y: 0}}
                     data={tags}
                     keyExtractor={(item, index) => index.toString()}
                     horizontal={true}
-                    renderItem={({item, index}) => <TagItem tag={item}/>}
-                    />
-            <Text style={[AppStyle.textRegularLarge, {color: Colors.orange, fontSize: 30}]}>My Tags</Text>
-            {
-                userTags.size == 0 ?
-                <Text style={AppStyle.errorMsg}>select a tag</Text> :
-                <View style={{flexDirection: 'row', gap: 10, flexWrap: 'wrap'}} >
-                    {
-                        Array.from(userTags).map((item, index) => 
-                            <View key={index} style={{paddingVertical: 8, paddingHorizontal: 10, borderRadius: 4, backgroundColor: Colors.orange}} >
-                                <Text style={AppStyle.textRegular}>{item}</Text>
-                            </View>
-                        )
-                    }
+                    renderItem={({item, index}) => <TagItem isSelected={tmpTags.has(item.tag_id)} tag={item} selectTag={selectTag}/>
+                    }/>
+                <View style={{width: '100%', alignItems: "center", justifyContent: "space-between", flexDirection: 'row'}} >
+                    <Text style={[AppStyle.textRegularLarge, {color: Colors.orange, fontSize: 30}]}>My Tags</Text>
+                    <Pressable 
+                        onPress={clearUserTags}
+                        style={styles.clearButton} 
+                        hitSlop={AppConstants.hitSlop}>
+                        <Text style={AppStyle.textRegular}>clear</Text>
+                    </Pressable>
+                    
                 </View>
-            }
+                {
+                    tmpTags.size == 0 ?
+                    <Text style={AppStyle.errorMsg}>* select a tag</Text> :
+                    <View style={{flexDirection: 'row', gap: 10, flexWrap: 'wrap'}} >
+                        {
+                            Array.from(tmpTags.values()).map((item, index) => 
+                                <View key={index} style={{paddingVertical: 8, paddingHorizontal: 10, borderRadius: 4, backgroundColor: Colors.orange}} >
+                                    <Text style={AppStyle.textRegular}>{item.name}</Text>
+                                </View>
+                            )
+                        }
+                    </View>
+                }
+            <Pressable onPress={saveTags} style={AppStyle.formButton} >
+                {
+                    loading ?
+                    <ActivityIndicator size={32} color={Colors.white} /> :
+                    <Text style={AppStyle.formButtonText}>Update</Text>
+                }
+            </Pressable>
         </View>
     )
 }
 
 export default TagSelector
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    container: {
+        width: '100%', 
+        gap: 20,
+        padding: 12,
+        backgroundColor: Colors.gray,
+        borderRadius: 4
+    },
+    tagsContainer: {
+        padding: 10,
+        gap: 10,
+        backgroundColor: Colors.gray,
+        borderRadius: 4
+    },
+    clearButton: {
+        paddingHorizontal: 10, 
+        paddingVertical: 8, 
+        backgroundColor: Colors.orange, 
+        borderRadius: 4
+    }
+})

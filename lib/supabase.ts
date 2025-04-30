@@ -357,7 +357,7 @@ export async function spGetCountryId(country: string): Promise<number | null> {
 export async function spGetTags(): Promise<TagUser[]> {
     const { data, error } = await supabase
         .from("tags")
-        .select("*")
+        .select("name, tag_id, descr")
         .overrideTypes<TagUser[]>()
 
     if (error) {
@@ -367,3 +367,36 @@ export async function spGetTags(): Promise<TagUser[]> {
 
     return data
 } 
+
+
+export async function spDeleteUserTags(user_id: string): Promise<boolean> { 
+    const { error } = await supabase
+        .from("user_tags")
+        .delete()
+        .eq("user_id", user_id)
+
+    if (error) {
+        console.log("spDeleteUserTags error", error)
+        return false
+    }
+    return true
+}
+
+export async function spUpsertUserTags(user_id: string, tags_ids: number[]): Promise<boolean> {
+    const successDelete = await spDeleteUserTags(user_id)
+    if (!successDelete) {
+        return false
+    }
+
+    const t = tags_ids.map(tag_id => {return {user_id, tag_id}})
+    const { error } = await supabase
+        .from("user_tags")
+        .upsert(t)
+    
+    if (error) {
+        console.log("spUpsertUserTags error", error)
+        return false
+    }
+
+    return true
+}

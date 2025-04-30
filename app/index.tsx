@@ -8,7 +8,8 @@ import {
     spGetSession, 
     spGetUser, 
     spUpdateUserLastLogin, 
-    fetchUserCards
+    fetchUserCards,
+    spGetUserTags
 } from '@/lib/supabase'
 import React, { useEffect } from 'react'
 import { AppStyle } from '@/style/AppStyle'
@@ -27,12 +28,14 @@ import {
 import { router } from 'expo-router'
 import { useAuthStore } from '@/store/authStore'
 import { useUserCardStore } from '@/store/userCardState'
+import { useUserTagState } from '@/store/userTagState'
 
 
 
 const App = () => {
 
     const { login, logout, setUserLoading } = useAuthStore()
+    const { setUserTagMap: setUserTags } = useUserTagState()
     const { setCards } = useUserCardStore()
 
     let [fontsLoaded] = useFonts({
@@ -71,6 +74,9 @@ const App = () => {
 
         login(session, user)
         await fetchUserCards(session.user.id).then(values => setCards(values))
+        await spGetUserTags(session.user.id).then(
+            values => setUserTags(new Map(values.map(item => [item.tag_id, item])))
+        )
         setUserLoading(false)
         spUpdateUserLastLogin(session.user.id)
         console.log("user logged")

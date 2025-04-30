@@ -18,7 +18,8 @@ import { useState } from 'react'
 import * as yup from 'yup';
 import React from 'react'
 import { useAuthStore } from '@/store/authStore';
-import TagSelector from '../TagSelector';
+import { AppStyle } from '@/style/AppStyle';
+import { hp } from '@/helpers/util';
 
 
 const schema = yup.object().shape({  
@@ -30,12 +31,17 @@ const schema = yup.object().shape({
     email: yup
         .string()
         .email('Please enter a valid email')
-        .required('Email is required')
+        .required('Email is required'),
+    bio: yup
+        .string()
+        .max(1024, "Max 1024 characters")
+
 });
 
 interface FormData {
     name: string
     email: string
+    bio: string | null
 }
 
 
@@ -50,10 +56,11 @@ const ChangeProfileInfoForm = () => {
         handleSubmit,
         formState: { errors },
     } = useForm<FormData>({
-        resolver: yupResolver(schema),
+        resolver: yupResolver(schema as any),
         defaultValues: {
             email: session && session.user.email ? session.user.email : '',
-            name: user ? user.username : ''
+            name: user ? user.username : '',
+            bio: user ? user.bio : null
         },
     });
     
@@ -64,12 +71,18 @@ const ChangeProfileInfoForm = () => {
         }
 
         const newUsername = form_data.name.trim()
+        const bio: string | null = form_data.bio ? 
+            form_data.bio.trim() == '' ?
+                null :
+                form_data.bio.trim()
+            :
+            null
 
         setLoading(true)
 
         const { error } = await supabase
             .from("users")
-            .update({"username": newUsername})
+            .update({"username": newUsername, "bio":  bio})
             .eq("user_id", session.user.id)
 
         setLoading(false)
@@ -91,59 +104,80 @@ const ChangeProfileInfoForm = () => {
     };
 
   return (
-    <KeyboardAvoidingView style={{width: '100%', gap: 20}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
-        <ScrollView style={{width: '100%'}} >
-            <TagSelector/>
-            {/* Name */}
-            <Text style={styles.inputHeaderText}>Username</Text>
-            <Controller
-                control={control}
-                name="name"
-                render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                    style={styles.input}
-                    autoComplete='name'
-                    autoCapitalize='none'                    
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}/>
-                )}
-            />
-            {errors.name && (<Text style={styles.error}>{errors.name.message}</Text>)}
+        <View style={styles.container} >
+        {/* Name */}
+        <Text style={styles.inputHeaderText}>Username</Text>
+        <Controller
+            control={control}
+            name="name"
+            render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+                style={styles.input}
+                autoComplete='name'
+                autoCapitalize='none'                    
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}/>
+            )}
+        />
+        {errors.name && (<Text style={styles.error}>{errors.name.message}</Text>)}
 
-            {/* Email */}
-            <Text style={styles.inputHeaderText}>Email</Text>
-            <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                    style={styles.input}                    
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}/>
-                )}
-            />
-            {errors.email && (<Text style={styles.error}>{errors.email.message}</Text>)}
-            
-            {/* Login Button */}
-            <Pressable onPress={handleSubmit(onSubmit)} style={styles.formButton} >
-                {
-                    isLoading ? 
-                    <ActivityIndicator size={32} color={Colors.white} /> :
-                    <Text style={styles.formButtonText} >Save</Text>
-                }
-            </Pressable>
-        </ScrollView>
-    </KeyboardAvoidingView>
+        {/* Bio */}
+        <Text style={styles.inputHeaderText}>Bio</Text>
+        <Controller
+            control={control}
+            name="bio"
+            render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+                style={[styles.input, {height: hp(20), paddingVertical: 10}]}
+                multiline={true}
+                textAlignVertical='top'
+                autoCapitalize='words'
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value ? value : ''}/>
+            )}
+        />
+        {errors.bio && (<Text style={styles.error}>{errors.bio.message}</Text>)}
+
+        {/* Email */}
+        <Text style={styles.inputHeaderText}>Email</Text>
+        <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+                style={styles.input}                    
+                keyboardType="email-address"
+                autoCapitalize="none"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}/>
+            )}
+        />
+        {errors.email && (<Text style={styles.error}>{errors.email.message}</Text>)}
+        
+        {/* Login Button */}
+        <Pressable onPress={handleSubmit(onSubmit)} style={AppStyle.formButton} >
+            {
+                isLoading ? 
+                <ActivityIndicator size={32} color={Colors.white} /> :
+                <Text style={AppStyle.formButtonText} >Update</Text>
+            }
+        </Pressable>
+    </View>    
   )
 }
 
 export default ChangeProfileInfoForm
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1, 
+        padding: 12, 
+        backgroundColor: Colors.gray, 
+        borderRadius: 4
+    },
     input: {
         backgroundColor: Colors.gray1,
         borderRadius: 4,
@@ -165,19 +199,5 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
         fontSize: 14,
         fontFamily: "LeagueSpartan_200ExtraLight"
-    },
-    formButton: {
-        width: '100%',
-        marginTop: 10,
-        alignItems: "center",
-        justifyContent: "center",
-        height: 50,
-        borderRadius: 4,
-        backgroundColor: Colors.orange
-    },
-    formButtonText: {
-        color: Colors.white,
-        fontSize: 22,
-        fontFamily: "LeagueSpartan_400Regular",
-    }
+    }    
 })
