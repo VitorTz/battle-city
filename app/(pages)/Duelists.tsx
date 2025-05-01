@@ -28,11 +28,11 @@ const Duelists = () => {
   const options = useRef<DuelistOptions>({
     country: '',
     name: '',
-    page: 0
+    page: 0,
+    tags: []
   })
-  
 
-  const init = async () => {
+  const init = useCallback(async () => {
     if (duelists.length == 0) {
       setLoading(true)
       await spFetchDuelists(session?.user.id, options.current)
@@ -40,13 +40,12 @@ const Duelists = () => {
       setLoading(false)
       isInitialized.current = true
     }
-  }
+  }, [])
 
   const handleSearch = async (text: string | null = '', append: boolean = false) => {
     setLoading(true)
     options.current.page = append ? options.current.page + 1 : 0
     options.current.name = text ? text.trim() : null
-    text = text ? text.trim() : ''
     await spFetchDuelists(session?.user.id, options.current)
       .then(values => {
         setHasResults(values.length > 0)
@@ -66,8 +65,7 @@ const Duelists = () => {
 
   const onEndReached = async () => {
     if (!isInitialized.current) { return }
-    console.log("end")
-    await handleSearch('', true)
+    await handleSearch(null, true)
   }
 
   const toggleMenu = () => {
@@ -75,13 +73,12 @@ const Duelists = () => {
   }
 
   const applyChanges = async () => {
-    console.log("oi")
     await handleSearch(options.current.name)
   }
 
   const debounceApplyFilters = useCallback(
-        debounce(applyChanges, 500),
-        []
+    debounce(applyChanges, 400),
+    []
   )
 
   return (

@@ -9,6 +9,7 @@ import { Colors } from '@/constants/Colors'
 import React from 'react'
 import { useDuelistState } from '@/store/duelistState'
 import { router } from 'expo-router'
+import DuelistTagList from '../DuelistTagList'
 
 
 const DuelistImage = ({duelist}: {duelist: Duelist}) => {
@@ -32,16 +33,30 @@ const DuelistImage = ({duelist}: {duelist: Duelist}) => {
         router.navigate("/DuelistPage")
     }
 
+    console.log(duelist.tags)
     return (
       <Pressable onPress={onPress} style={styles.duelistContainer} >
-        <DuelistImage duelist={duelist} />
-        <View style={{flex: 1}}>
-            <Text numberOfLines={1} style={AppStyle.textRegularLarge}>{duelist.username}</Text>
-            <Text style={AppStyle.textRegular}>{duelist.country}</Text>          
+        <View style={{flexDirection: 'row', width: '100%', gap: 20}} >
+          <View style={{alignItems: "center", justifyContent: "center"}} >
+            <DuelistImage duelist={duelist} />
+          </View>
+          <View style={{flex: 1, gap: 10}}>
+              <Text numberOfLines={1} style={AppStyle.textRegularLarge}>{duelist.username}</Text>
+              <Text style={AppStyle.textRegular}>{duelist.country}</Text>          
+          </View>
         </View>
-        <Pressable style={styles.sendButton} hitSlop={AppConstants.hitSlopLarge} >
-            <Ionicons name='send' size={22} color={Colors.white} />
-        </Pressable>
+        {
+          duelist.tags.length > 0 &&
+          <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 10}} >
+            {
+              duelist.tags.map((item, index) => 
+                <View key={index} style={styles.tag} >
+                  <Text style={AppStyle.textRegular}>{item.name}</Text>
+                </View> 
+              )
+            }
+          </View>
+        }
       </Pressable>
     )
   }
@@ -55,7 +70,6 @@ const styles = StyleSheet.create({
         borderRadius: 4
       },
       duelistContainer: {
-        flexDirection: 'row', 
         gap: 20,
         borderRadius: 4,
         padding: 12,
@@ -66,5 +80,10 @@ const styles = StyleSheet.create({
         position: 'absolute', 
         right: 16, 
         bottom: 16
+      },
+      tag: {
+        backgroundColor: Colors.background,
+        padding: 10,
+        borderRadius: 4
       }
 })

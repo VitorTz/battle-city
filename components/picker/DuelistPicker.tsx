@@ -7,6 +7,7 @@ import { DuelistOptions } from '@/types/DuelistOptions'
 import CountryPicker from './CountryPicker'
 import { Colors } from '@/constants/Colors'
 import { AppStyle } from '@/style/AppStyle'
+import TagPicker from './TagPicker'
 
 
 interface DuelistPickerProps {
@@ -21,13 +22,14 @@ const DuelistPicker = ({ options, applyChanges }: DuelistPickerProps) => {
         await applyChanges()
     }
 
-    const reset = async () => {
-        options.country = null
+    const filterTag = async (tags_ids: number[]) => {
+        options.tags = tags_ids
         await applyChanges()
     }
 
     return (
         <View style={{width: '100%', rowGap: 10}} >
+            <TagPicker applyFilter={filterTag} />
             <CountryPicker 
                 allowAnyCountry={true} 
                 backgroundColor={Colors.gray} 

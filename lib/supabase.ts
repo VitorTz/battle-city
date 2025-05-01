@@ -333,7 +333,7 @@ export async function spFetchDuelists(
             } : null,
             country: (item.countries as any).country_name,
             bio: item.bio,
-            tags: []
+            tags: item.tags
         }}
     )
 }
