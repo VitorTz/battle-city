@@ -457,3 +457,18 @@ export async function spUpsertUserTags(user_id: string, tags_ids: number[]): Pro
 
     return true
 }
+
+
+export async function spCopyDeck(
+    p_source_deck_id: number,
+    p_new_owner_id: string
+): Promise<PostgrestError | null> {
+    const { data, error } = await supabase
+        .rpc("clone_deck_with_cards", {p_source_deck_id, p_new_owner_id})
+
+    if (error) {
+        console.log("error spCopyDeck", error)
+        return error
+    }
+    return null
+}

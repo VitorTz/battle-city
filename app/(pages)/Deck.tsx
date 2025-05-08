@@ -45,13 +45,18 @@ const Deck = () => {
                 <View style={{flex: 1, gap: 20, alignItems: "center", justifyContent: "center"}} >
                     <Image source={deck!.image_url} style={styles.image} contentFit='cover' />
                     <Text style={[AppStyle.textRegularLarge, {alignSelf: "flex-start", fontSize: 28, color: Colors.orange}]}>{deck?.name}</Text>
-                    <Text style={AppStyle.textRegular}>{deck!.descr}</Text>
-                    <CopyDeck deck_id={deck!.deck_id} />
-                    <CardGrid 
-                        cards={cards} 
-                        title={`Cards: ${deck!.num_cards}`} 
-                        numColumns={3}
-                        showNumCopies={true}/>
+                    {
+                        deck && deck.descr &&
+                        <Text style={AppStyle.textRegular}>{deck.descr}</Text>
+                    }
+                    <View style={{gap: 10, width: '100%'}} >
+                        <CopyDeck deck_id={deck!.deck_id} />
+                        <CardGrid 
+                            cards={cards} 
+                            title={`Cards: ${deck!.num_cards}`} 
+                            numColumns={3}
+                            showNumCopies={true}/>
+                    </View>
                 </View>
             </ScrollView>
         </SafeAreaView>

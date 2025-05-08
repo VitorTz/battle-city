@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { AppStyle } from '@/style/AppStyle'
 import { useAuthStore } from '@/store/authStore'
 import Toast from './Toast'
+import { spCopyDeck } from '@/lib/supabase'
 
 interface CopyDeckProps {
     deck_id: number
@@ -21,6 +22,7 @@ const CopyDeck = ({deck_id}: CopyDeckProps) => {
             return
         }
         setLoading(true)
+        await spCopyDeck(deck_id, session.user.id)
         setLoading(false)
     }
 

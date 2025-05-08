@@ -13,6 +13,6 @@ export type Card = {
     card_type: string | null
     descr: string
     image_url: string
-    cropped_image_url: string
+    image_url_cropped: string
     num_copies: number
 }
