@@ -30,6 +30,7 @@ export const AppConstants = {
         bottom: 10
     },
     CARD_FETCH_LIMIT: 42,
+    DECK_FETCH_LIMIT: 32,
     USER_FETCH_LIMIT: 100,
     maxDeckDescrLenght: 5000,
     githubUrl: "https://github.com/VitorTz/battle-city",

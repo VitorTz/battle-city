@@ -1,4 +1,4 @@
-import { AppConstants } from "@/constants/AppConstants";
+import { AppConstants, DECK_TYPES } from "@/constants/AppConstants";
 import { AppUser } from "@/types/AppUser";
 import { Card } from "@/types/Card";
 import { CardSearchOptions } from "@/types/CardOptions";
@@ -11,6 +11,8 @@ import { Prices } from "@/types/Prices";
 import { Duelist } from "@/types/Duelist";
 import { DuelistOptions } from "@/types/DuelistOptions";
 import { TagUser } from "@/types/UserTag";
+import { DeckSearchOptions } from "@/types/DeckOptions";
+import { Deck } from "@/types/Deck";
 
 
 const supabaseUrl = 'https://mlhjkqlgzlkvtqjngzdr.supabase.co'
@@ -193,6 +195,30 @@ export async function spFetchCards(options: CardSearchOptions) {
     return data ? data : []    
 }
 
+export async function spFetchDecks(options: DeckSearchOptions): Promise<Deck[]> {
+    let query = supabase
+        .from('decks')
+        .select('deck_id, name, type, num_cards, image_url, descr, created_by')
+        .eq("is_public", true)
+    
+    if (DECK_TYPES.includes(options.deckType)) {
+        query = query.eq("type", options.deckType)
+    }
+
+    if (options.name) {        
+        query = query.ilike("name", `%${options.name}%`)
+    }
+
+    const {data, error} = await query
+        .range(options.page * AppConstants.DECK_FETCH_LIMIT, ((options.page + 1) * AppConstants.DECK_FETCH_LIMIT) - 1)        
+
+    if (error) { 
+        console.log("error while fetching decks", options, '\n', error)
+    }
+
+    return data ? data : []    
+}
+
 export async function supabaseAddCardToUserCollection(
     user_id: string,
     card_id: number, 
@@ -213,6 +239,37 @@ export async function supabaseAddCardToUserCollection(
     return true
 }
 
+export async function spFetchDeckCards(deck_id: number): Promise<Card[]> {
+    const { data, error } = await supabase
+        .from("deck_cards")
+        .select(`
+            num_cards, 
+            cards (
+                name, 
+                card_id, 
+                attack, 
+                defence, 
+                level, 
+                archetype, 
+                attribute, 
+                frametype, 
+                race, 
+                card_type, 
+                descr, 
+                image_url, 
+                image_url_cropped
+            )
+        `).eq("deck_id", deck_id)
+
+    if (error) {
+        console.log("error spFetchDeckCards", error)
+        return []
+    }
+
+    return data.map(
+        item => {return {...(item.cards as any), num_copies: item.num_cards as number}}
+    )
+}
 
 export async function supabaseRmvCardFromUserCollection(
     user_id: string,

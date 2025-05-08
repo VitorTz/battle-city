@@ -28,6 +28,7 @@ const _layout = () => {
             <Stack.Screen name='(pages)/Tournaments' options={{headerShown: false}} />
             <Stack.Screen name='(pages)/Card' options={{headerShown: false}} />
             <Stack.Screen name='(pages)/CardCollection' options={{headerShown: false}} />
+            <Stack.Screen name='(pages)/Deck' options={{headerShown: false}} />
         </Stack>
         <Toast.Component/>
         <DialogMessage.Component/>

@@ -17,6 +17,7 @@ interface CardGridProps {
     numColumns?: number,
     color?: string,
     children?: React.JSX.Element
+    showNumCopies?: boolean
 }
 
 
@@ -26,7 +27,8 @@ const CardGrid = ({
     height = hp(50),
     numColumns = 2,
     color = Colors.cardsColor,
-    children
+    children,
+    showNumCopies = false
 }: CardGridProps) => {
 
     const {width: cardWidth, height: cardHeight} = getItemGridDimensions(
@@ -51,7 +53,7 @@ const CardGrid = ({
                 estimatedItemSize={cardHeight * 2}
                 keyExtractor={(item) => item.card_id.toString()}
                 drawDistance={hp(100)}
-                renderItem={({item}) => <CardItem  card={item} width={cardWidth} height={cardHeight} />}
+                renderItem={({item}) => <CardItem showNumCopies={showNumCopies} card={item} width={cardWidth} height={cardHeight} />}
             />
         </View>
     )
